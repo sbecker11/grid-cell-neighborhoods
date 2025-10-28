@@ -1,5 +1,6 @@
 # Core dependency
-numpy>=1.20.0
+# Using numpy<2 to ensure compatibility with PyTorch/JAX compiled modules
+numpy>=1.20.0,<2.0.0
 
 # GPU acceleration (install as needed)
 torch>=2.0.0  # For CUDA/MPS GPU support (install separately with appropriate CUDA version)
