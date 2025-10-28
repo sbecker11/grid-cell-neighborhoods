@@ -558,7 +558,7 @@ def test_manhattan_performance_comparison():
 
 def test_example_1_n3_centered():
     """Example 1: One positive cell fully contained; N=3"""
-    # According to project-description.txt: 25 cells in N=3 neighborhood
+    # According to Counting_grid-cell_neighborhoods.txt: 25 cells in N=3 neighborhood
     sparse = SparseGrid(11, 11, [(5, 5)], L=3)
     count = sparse.count_positive_values()
     
@@ -578,7 +578,7 @@ def test_example_1_n3_centered():
 
 def test_example_2_n3_near_edge():
     """Example 2: One positive cell near an edge; N=3"""
-    # According to project-description.txt: 21 cells (25 - 4 that fell off edge)
+    # According to Counting_grid-cell_neighborhoods.txt: 21 cells (25 - 4 that fell off edge)
     sparse = SparseGrid(11, 11, [(5, 2)], L=3)
     count = sparse.count_positive_values()
     
@@ -596,7 +596,7 @@ def test_example_2_n3_near_edge():
 
 def test_example_3_n2_disjoint():
     """Example 3: Two positive values with disjoint neighborhoods; N=2"""
-    # According to project-description.txt: 26 cells total (13 per neighborhood)
+    # According to Counting_grid-cell_neighborhoods.txt: 26 cells total (13 per neighborhood)
     sparse = SparseGrid(11, 11, [(2, 2), (8, 8)], L=2)
     count = sparse.count_positive_values()
     
@@ -614,7 +614,7 @@ def test_example_3_n2_disjoint():
 
 def test_example_4_n2_overlapping():
     """Example 4: Two positive values with overlapping neighborhoods; N=2"""
-    # According to project-description.txt: 22 cells (overlapping)
+    # According to Counting_grid-cell_neighborhoods.txt: 22 cells (overlapping)
     # Place seeds close enough that neighborhoods overlap
     sparse = SparseGrid(11, 11, [(5, 5), (6, 6)], L=2)
     count = sparse.count_positive_values()

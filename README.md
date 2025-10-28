@@ -7,7 +7,8 @@ This project provides highly optimized Python functions for counting positive va
 - **`grid_counting.py`** - Main module with all counting and Manhattan neighborhood functions
 - **`grid_counting_tests.py`** - Comprehensive test suite including functionality tests and performance benchmarks
 - **`requirements.txt`** - Python package dependencies
-- **`Counting_grid-cell_neighborhoods.pdf`** - Project description and detailed documentation
+- **`Counting_grid-cell_neighborhoods.pdf`** - Project description (PDF version)
+- **`Counting_grid-cell_neighborhoods.txt`** - Project description (text version)
 - **`README.md`** - This documentation
 
 ## Features
