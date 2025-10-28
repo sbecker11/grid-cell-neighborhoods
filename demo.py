@@ -8,7 +8,7 @@ Original requirement:
 """
 
 import numpy as np
-from sum_2d_array import intelligent_sum_2d_array, sum_only_positive, detect_available_accelerators
+from count_2d_array import intelligent_sum_2d_array, sum_only_positive, detect_available_accelerators
 
 print("=" * 70)
 print("Demo: Summing Positive Int Elements from 2D Array")

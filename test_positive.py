@@ -3,7 +3,7 @@ Unit tests for 2D array positive value counting functions.
 """
 
 import numpy as np
-from sum_2d_array import detect_available_accelerators, set_locations_to_one, create_sparse_grid, count_nonzero_2d_array
+from count_2d_array import detect_available_accelerators, set_locations_to_one, create_sparse_grid, count_nonzero_2d_array
 
 
 def test_set_locations_basic():

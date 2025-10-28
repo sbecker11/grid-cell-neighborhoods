@@ -44,7 +44,7 @@ pip install -r requirements.txt
 ## Quick Start
 
 ```python
-from sum_2d_array import intelligent_sum_2d_array, sum_only_positive, set_locations_to_one, detect_available_accelerators
+from count_2d_array import intelligent_sum_2d_array, sum_only_positive, set_locations_to_one, detect_available_accelerators
 
 # Detect available hardware
 accelerators = detect_available_accelerators()
@@ -132,7 +132,7 @@ All methods are significantly faster than naive Python loops.
 
 ```python
 import numpy as np
-from sum_2d_array import intelligent_sum_2d_array
+from count_2d_array import intelligent_sum_2d_array
 
 # Create a large random array
 large_array = np.random.rand(1000, 1000)
@@ -149,7 +149,7 @@ print(f"Positive sum: {positive_total:.2f}")
 ### Setting Locations
 
 ```python
-from sum_2d_array import set_locations_to_one, create_sparse_grid
+from count_2d_array import set_locations_to_one, create_sparse_grid
 
 # Create a grid with specific locations set to 1
 locations = [(0, 0), (1, 1), (2, 2)]
@@ -169,7 +169,7 @@ grid = create_sparse_grid(3, 3, [(0, 0), (2, 2)])
 ### Complete Workflow
 
 ```python
-from sum_2d_array import set_locations_to_one, intelligent_sum_2d_array
+from count_2d_array import set_locations_to_one, intelligent_sum_2d_array
 
 # Create a sparse grid
 active_locations = [(0, 0), (0, 4), (4, 0), (4, 4), (2, 2)]

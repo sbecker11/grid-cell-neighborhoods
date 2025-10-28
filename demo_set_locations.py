@@ -5,7 +5,7 @@ This demonstrates the efficient way to set specific locations in a 2D array to 1
 """
 
 import numpy as np
-from sum_2d_array import set_locations_to_one, create_sparse_grid, intelligent_sum_2d_array
+from count_2d_array import set_locations_to_one, create_sparse_grid, intelligent_sum_2d_array
 
 print("=" * 70)
 print("Demo: Setting Specific Locations in 2D Arrays")

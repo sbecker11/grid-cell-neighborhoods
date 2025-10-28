@@ -10,7 +10,7 @@ This script compares the performance of:
 
 import time
 import numpy as np
-from sum_2d_array import intelligent_sum_2d_array, sum_only_positive, detect_available_accelerators
+from count_2d_array import intelligent_sum_2d_array, sum_only_positive, detect_available_accelerators
 
 
 def naive_sum_2d(array):
