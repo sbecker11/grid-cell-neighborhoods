@@ -34,9 +34,13 @@ class FullGrid:
             initial_value: Value to fill if creating new grid (default=0)
         """
         if isinstance(shape_or_array, tuple):
+            if shape_or_array[0] <= 0 or shape_or_array[1] <= 0:
+                raise ValueError(f"Grid dimensions must be > 0, got {shape_or_array}")
             self.grid = np.full(shape_or_array, initial_value, dtype=np.int32)
         else:
             self.grid = np.asarray(shape_or_array).copy()
+            if self.grid.size == 0 or len(self.grid.shape) != 2 or self.grid.shape[0] <= 0 or self.grid.shape[1] <= 0:
+                raise ValueError(f"Grid must be 2D with dimensions > 0, got shape {self.grid.shape}")
     
     def set_locations(self, locations, value=2):
         """Set specified locations to a value."""
@@ -201,12 +205,15 @@ class SparseGrid:
         Create a SparseGrid.
         
         Args:
-            num_rows: Number of rows
-            num_cols: Number of columns
+            num_rows: Number of rows (must be > 0)
+            num_cols: Number of columns (must be > 0)
             locations: List of (row, col) tuples
             values: List of values (defaults to 2 for all)
             L: Manhattan distance for neighborhood expansion
         """
+        if num_rows <= 0 or num_cols <= 0:
+            raise ValueError(f"Grid dimensions must be > 0, got {num_rows}x{num_cols}")
+        
         self.num_rows = num_rows
         self.num_cols = num_cols
         self.locations = locations

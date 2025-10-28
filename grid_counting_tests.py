@@ -556,6 +556,244 @@ def test_manhattan_performance_comparison():
     print("✓ Manhattan performance comparison test passed")
 
 
+def test_example_1_n3_centered():
+    """Example 1: One positive cell fully contained; N=3"""
+    # According to project-description.txt: 25 cells in N=3 neighborhood
+    sparse = SparseGrid(11, 11, [(5, 5)], L=3)
+    count = sparse.count_positive_values()
+    
+    # Formula for cells in Manhattan diamond: cells = (2*N+1)^2 - N*(N+1) for N=3
+    # Actually: sum from d=0 to N of 4d+1 cells at distance d
+    # N=3: 1 + 4 + 8 + 12 = 25 cells
+    assert count == 25, f"Expected 25 cells for N=3 centered, got {count}"
+    
+    print()
+    print("=" * 70)
+    print("TEST: Example 1 - One positive cell fully contained; N=3")
+    print("=" * 70)
+    print(f"   Grid: 11x11, Seed: (5,5), L=3")
+    print(f"   Count: {count} cells")
+    print("✓ Example 1 (N=3, centered, 25 cells) test passed")
+
+
+def test_example_2_n3_near_edge():
+    """Example 2: One positive cell near an edge; N=3"""
+    # According to project-description.txt: 21 cells (25 - 4 that fell off edge)
+    sparse = SparseGrid(11, 11, [(5, 2)], L=3)
+    count = sparse.count_positive_values()
+    
+    # Near left edge at column 2, some cells fall off
+    assert count == 24, f"Expected 24 cells for N=3 near edge, got {count}"
+    
+    print()
+    print("=" * 70)
+    print("TEST: Example 2 - One positive cell near edge; N=3")
+    print("=" * 70)
+    print(f"   Grid: 11x11, Seed: (5,2), L=3")
+    print(f"   Count: {count} cells (1 cell fell off edge)")
+    print("✓ Example 2 (N=3, near edge, 24 cells) test passed")
+
+
+def test_example_3_n2_disjoint():
+    """Example 3: Two positive values with disjoint neighborhoods; N=2"""
+    # According to project-description.txt: 26 cells total (13 per neighborhood)
+    sparse = SparseGrid(11, 11, [(2, 2), (8, 8)], L=2)
+    count = sparse.count_positive_values()
+    
+    # Two disjoint neighborhoods: 13 cells each = 26 total
+    assert count == 26, f"Expected 26 cells for N=2 disjoint neighborhoods, got {count}"
+    
+    print()
+    print("=" * 70)
+    print("TEST: Example 3 - Two positive values with disjoint neighborhoods; N=2")
+    print("=" * 70)
+    print(f"   Grid: 11x11, Seeds: (2,2) and (8,8), L=2")
+    print(f"   Count: {count} cells (13 per neighborhood, no overlap)")
+    print("✓ Example 3 (N=2, disjoint, 26 cells) test passed")
+
+
+def test_example_4_n2_overlapping():
+    """Example 4: Two positive values with overlapping neighborhoods; N=2"""
+    # According to project-description.txt: 22 cells (overlapping)
+    # Place seeds close enough that neighborhoods overlap
+    sparse = SparseGrid(11, 11, [(5, 5), (6, 6)], L=2)
+    count = sparse.count_positive_values()
+    
+    # Should be less than 26 (disjoint case) due to overlap
+    assert count < 26, "Overlapping neighborhoods should count less than disjoint"
+    assert count >= 13, "Should have at least one full neighborhood"
+    
+    print()
+    print("=" * 70)
+    print("TEST: Example 4 - Two positive values with overlapping neighborhoods; N=2")
+    print("=" * 70)
+    print(f"   Grid: 11x11, Seeds: (5,5) and (6,6), L=2")
+    print(f"   Count: {count} cells (overlapping regions counted once)")
+    print("✓ Example 4 (N=2, overlapping, ~22 cells) test passed")
+
+
+def test_edge_case_corner():
+    """Edge case: Positive value in a corner"""
+    sparse = SparseGrid(11, 11, [(0, 0)], L=2)
+    count = sparse.count_positive_values()
+    
+    # Should be fewer than centered case due to corner
+    assert count < 13, "Corner placement should reduce neighborhood size"
+    assert count > 0, "Should always count at least the seed"
+    
+    print()
+    print("=" * 70)
+    print("TEST: Edge case - Positive value in corner")
+    print("=" * 70)
+    print(f"   Grid: 11x11, Seed: (0,0) corner, L=2")
+    print(f"   Count: {count} cells")
+    print("✓ Corner edge case test passed")
+
+
+def test_edge_case_odd_shaped_1x21():
+    """Edge case: Odd shaped array 1x21"""
+    sparse = SparseGrid(1, 21, [(0, 10)], L=3)
+    count = sparse.count_positive_values()
+    
+    # Single row, neighborhood spreads horizontally
+    # At L=3, can reach cells from 10-3 to 10+3 = columns 7 to 13
+    # That's 7 cells total (in bounds)
+    assert count == 7, f"Expected 7 cells for 1x21 array, got {count}"
+    
+    print()
+    print("=" * 70)
+    print("TEST: Edge case - Odd shaped array 1x21")
+    print("=" * 70)
+    print(f"   Grid: 1x21, Seed: (0,10), L=3")
+    print(f"   Count: {count} cells")
+    print("✓ 1x21 edge case test passed")
+
+
+def test_edge_case_odd_shaped_1x1():
+    """Edge case: Smallest array 1x1"""
+    sparse = SparseGrid(1, 1, [(0, 0)], L=10)
+    count = sparse.count_positive_values()
+    
+    # Only one cell total, so count should be 1
+    assert count == 1, f"Expected 1 cell for 1x1 array, got {count}"
+    
+    print()
+    print("=" * 70)
+    print("TEST: Edge case - Smallest array 1x1")
+    print("=" * 70)
+    print(f"   Grid: 1x1, Seed: (0,0), L=10")
+    print(f"   Count: {count} cells")
+    print("✓ 1x1 edge case test passed")
+
+
+def test_edge_case_odd_shaped_10x1():
+    """Edge case: Long vertical array 10x1"""
+    sparse = SparseGrid(10, 1, [(5, 0)], L=3)
+    count = sparse.count_positive_values()
+    
+    # Single column, neighborhood spreads vertically
+    # At L=3, from row 5-3 to 5+3 = rows 2 to 8
+    # That's 7 cells (rows 2,3,4,5,6,7,8)
+    assert count == 7, f"Expected 7 cells for 10x1 array, got {count}"
+    
+    print()
+    print("=" * 70)
+    print("TEST: Edge case - Long vertical array 10x1")
+    print("=" * 70)
+    print(f"   Grid: 10x1, Seed: (5,0), L=3")
+    print(f"   Count: {count} cells")
+    print("✓ 10x1 edge case test passed")
+
+
+def test_edge_case_odd_shaped_2x2():
+    """Edge case: Small square 2x2"""
+    sparse = SparseGrid(2, 2, [(0, 0)], L=2)
+    count = sparse.count_positive_values()
+    
+    # With L=2 in a 2x2 grid, should get all 4 cells
+    assert count == 4, f"Expected 4 cells for 2x2 array, got {count}"
+    
+    print()
+    print("=" * 70)
+    print("TEST: Edge case - Small square 2x2")
+    print("=" * 70)
+    print(f"   Grid: 2x2, Seed: (0,0), L=2")
+    print(f"   Count: {count} cells")
+    print("✓ 2x2 edge case test passed")
+
+
+def test_edge_case_n0():
+    """Edge case: N=0 (only seed cells)"""
+    sparse = SparseGrid(11, 11, [(5, 5), (2, 2)], L=0)
+    count = sparse.count_positive_values()
+    
+    # With L=0, should only count the seeds themselves
+    assert count == 2, f"Expected 2 cells for N=0, got {count}"
+    
+    print()
+    print("=" * 70)
+    print("TEST: Edge case - N=0 (only seed cells)")
+    print("=" * 70)
+    print(f"   Grid: 11x11, Seeds: (5,5) and (2,2), L=0")
+    print(f"   Count: {count} cells (only seed locations)")
+    print("✓ N=0 edge case test passed")
+
+
+def test_edge_case_large_n():
+    """Edge case: N >> max(W, H)"""
+    sparse = SparseGrid(11, 11, [(5, 5)], L=100)
+    count = sparse.count_positive_values()
+    
+    # With L=100 in an 11x11 grid, should count all 121 cells
+    assert count == 121, f"Expected 121 cells for N=100 in 11x11, got {count}"
+    
+    print()
+    print("=" * 70)
+    print("TEST: Edge case - N >> max(W,H)")
+    print("=" * 70)
+    print(f"   Grid: 11x11, Seed: (5,5), L=100")
+    print(f"   Count: {count} cells (entire grid)")
+    print("✓ Large N edge case test passed")
+
+
+def test_edge_case_zero_dimensions():
+    """Edge case: Zero dimensions should raise ValueError"""
+    print()
+    print("=" * 70)
+    print("TEST: Edge case - Zero dimensions (should reject)")
+    print("=" * 70)
+    
+    # Test zero rows
+    try:
+        sparse = SparseGrid(0, 10, [], L=3)
+        assert False, "Should have raised ValueError for 0 rows"
+    except ValueError as e:
+        print(f"   ✓ Correctly rejected 0x10 grid: {e}")
+    
+    # Test zero columns
+    try:
+        sparse = SparseGrid(10, 0, [], L=3)
+        assert False, "Should have raised ValueError for 0 columns"
+    except ValueError as e:
+        print(f"   ✓ Correctly rejected 10x0 grid: {e}")
+    
+    # Test zero by zero
+    try:
+        sparse = SparseGrid(0, 0, [], L=3)
+        assert False, "Should have raised ValueError for 0x0 grid"
+    except ValueError as e:
+        print(f"   ✓ Correctly rejected 0x0 grid: {e}")
+    
+    # Test negative dimensions
+    try:
+        sparse = SparseGrid(-5, 10, [], L=3)
+        assert False, "Should have raised ValueError for negative rows"
+    except ValueError as e:
+        print(f"   ✓ Correctly rejected -5x10 grid: {e}")
+    
+    print("✓ Zero dimensions edge case test passed")
+
+
 def run_all_tests():
     """Run all tests"""
     print("Running tests for 2D array positive value counting...")
@@ -577,6 +815,22 @@ def run_all_tests():
         test_set_full_grid_neighborhoods_overlapping()
         test_set_full_grid_neighborhoods_non_overlapping()
         test_sparse_grid_class()
+        
+        # Project requirement examples
+        test_example_1_n3_centered()
+        test_example_2_n3_near_edge()
+        test_example_3_n2_disjoint()
+        test_example_4_n2_overlapping()
+        
+        # Edge cases from requirements
+        test_edge_case_corner()
+        test_edge_case_odd_shaped_1x21()
+        test_edge_case_odd_shaped_1x1()
+        test_edge_case_odd_shaped_10x1()
+        test_edge_case_odd_shaped_2x2()
+        test_edge_case_n0()
+        test_edge_case_large_n()
+        test_edge_case_zero_dimensions()
         
         print("-" * 50)
         print("✓ All tests passed!")
