@@ -52,9 +52,9 @@ A **dense grid** is a fully allocated 2D NumPy array where every cell exists in 
 from grid_counting import DenseGrid
 
 # Allocates full 100×100 = 10,000 cells in memory
-grid = DenseGrid((100, 100))
-grid.set_locations([(10, 10), (20, 20)], value=2)
-count = grid.count_positive_values()  # Counts from full grid array
+denseGrid = DenseGrid(100, 100)
+denseGrid.set_locations_to_value([(10, 10), (20, 20)], value=2)
+count = denseGrid.count_positive_valued_cells()  # Counts from full grid array
 ```
 
 ### **Sparse Arrays (`SparseGrid`)**
@@ -78,8 +78,9 @@ A **sparse grid** stores only the locations and values of active cells without a
 from grid_counting import SparseGrid
 
 # No grid allocation - only stores locations [(10,10), (20,20)]
-sparse = SparseGrid(100, 100, locations=[(10, 10), (20, 20)], L=3)
-count = sparse.count_positive_values()  # Counts without creating grid (faster!)
+sparseGrid = SparseGrid(100, 100)
+sparseGrid.set_neighborhoods_to_value([(10, 10), (20, 20)], L=3, value=2)
+count = sparseGrid.count_positive_valued_cells()
 ```
 
 ### **Quick Decision Guide**
@@ -117,75 +118,73 @@ python -m venv venv && source venv/bin/activate && pip install -r requirements.t
 ## Examples
 
 ```python
-from grid_counting import count_positive_valued_cells_in_2d_array, set_locations_to_value_dense_grid, count_manhattan_neighborhoods_sparse_grid
+import numpy as np
+from grid_counting import DenseGrid, SparseGrid
 
-# Count positive values in a 2D array
+# Create a dense grid and count positive values
 my_2d_array = np.array([
     [1, 2, 0],   # row 0
     [0, 5, -3],  # row 1
     [4, 0, 1]    # row 2
 ])
-count = count_positive_valued_cells_in_2d_array(my_2d_array)  # Returns 5
+denseGrid = DenseGrid(my_2d_array)
+count = denseGrid.count_positive_valued_cells()  # Returns 5
 
 # Set specific locations to 2
-num_rows, num_cols = 5, 5
-grid = set_locations_to_value_dense_grid((num_rows, num_cols), [(0, 0), (1, 1), (2, 2)], value=2)
+denseGrid = DenseGrid(5, 5)
+denseGrid.set_locations_to_value([(0, 0), (1, 1), (2, 2)], value=2)
 
 # Count Manhattan neighborhoods (OPTIMAL - no grid creation)
-count = count_manhattan_neighborhoods(
-    num_rows=100, num_cols=100,
-    seeds=[(10, 10), (20, 20), (30, 30)],
-    L=3  # Manhattan distance
-)
-# Returns count of positive-valued cells within L=3 from all seeds
+sparseGrid = SparseGrid(100, 100)
+sparseGrid.set_neighborhoods_to_value([(10, 10), (20, 20), (30, 30)], L=3, value=2)
+count = sparseGrid.count_positive_valued_cells()
+# Returns count of positive-valued cells within L=3 from all locations
 ```
 
-## Functions
+## Classes
 
-### `count_positive_valued_cells_in_2d_array(array)`
-Counts positive values in a 2D array using the fastest available hardware.
-
-**Parameters:**
-- `array`: 2D numpy array
-
-**Returns:**
-- Count of elements > 0
-
-### `set_locations_to_value_dense_grid(shape_or_array, locations, value=2)`
-Efficiently sets specified locations in a 2D array to a value.
+### `DenseGrid(height, width, initial_value=0)`
+A dense 2D grid represented as a numpy array.
 
 **Parameters:**
-- `shape_or_array`: Either a tuple (height, width) to create a new array, or an existing 2D numpy array
-- `locations`: List of tuples (row, col) indicating positions to set
-- `value`: The value to set at the specified locations (default=2)
+- `height`: Number of rows
+- `width`: Number of columns
+- `initial_value`: Value to fill grid with (default=0)
 
-**Returns:**
-- numpy.ndarray with specified values at locations, 0 elsewhere
+**Methods:**
+- `set_locations_to_value(locations, value=2)`: Set specified locations to a value
+- `set_neighborhoods_to_value(locations, L=3, value=2)`: Set neighborhoods around locations using BFS
+- `count_positive_valued_cells()`: Count positive-valued cells using hardware acceleration
 
 **Example:**
 ```python
 import numpy as np
+from grid_counting import DenseGrid
 
-# Create new grid with locations set to 2
-grid = set_locations_to_value_dense_grid((5, 5), [(0, 0), (2, 2), (4, 4)], value=2)
+# Create new grid
+denseGrid = DenseGrid(5, 5)
 
-# Set locations to a different value
-grid = set_locations_to_value_dense_grid(grid, [(1, 1), (3, 3)], value=5)
+# Set locations to a value
+denseGrid.set_locations_to_value([(0, 0), (2, 2), (4, 4)], value=2)
+
+# Set neighborhoods around locations
+denseGrid.set_neighborhoods_to_value([(1, 1), (3, 3)], L=2, value=2)
+
+# Count positive values
+count = denseGrid.count_positive_valued_cells()
 ```
 
-### `count_manhattan_neighborhoods_sparse_grid(num_rows, num_cols, seeds, L)`
-**⚡ RECOMMENDED FUNCTION** - Count positive-valued cells within Manhattan distance L from seed locations.
-
-This is the optimal top-level function for counting without creating a grid. It's 3-6x faster and uses no grid memory allocation.
+### `SparseGrid(height, width)`
+A sparse grid that stores only seed locations and Manhattan distance, avoiding full grid allocation.
 
 **Parameters:**
-- `num_rows`: Number of rows in the grid
-- `num_cols`: Number of columns in the grid
-- `seeds`: List of tuples (row, col) - seed locations
-- `L`: Maximum Manhattan distance from seeds to count
+- `height`: Number of rows (must be > 0)
+- `width`: Number of columns (must be > 0)
 
-**Returns:**
-- int: Count of positive-valued cells within Manhattan distance L from all seeds
+**Methods:**
+- `set_locations_to_value(locations, value=2)`: Set specified locations to a single value (applies same value to all locations)
+- `set_neighborhoods_to_value(locations, L, value=2)`: Set neighborhoods around locations using BFS (applies same value to all unset cells)
+- `count_positive_valued_cells()`: Count positive-valued cells without creating grid
 
 **Benefits:**
 - Fastest approach (3-6x faster than creating grid)
@@ -195,40 +194,17 @@ This is the optimal top-level function for counting without creating a grid. It'
 
 **Example:**
 ```python
-from grid_counting import count_manhattan_neighborhoods
+from grid_counting import SparseGrid
 
-# Count neighborhoods around 3 seeds
-seeds = [(10, 10), (50, 50), (90, 90)]
-count = count_manhattan_neighborhoods(
-    num_rows=100, num_cols=100,
-    seeds=seeds, 
-    L=5
-)
-# Returns count of positive-valued cells within L=5 from all seeds
+# Create sparse grid
+sparseGrid = SparseGrid(100, 100)
+
+# Set neighborhoods around locations
+sparseGrid.set_neighborhoods_to_value([(10, 10), (50, 50), (90, 90)], L=5, value=2)
+
+# Count positive-valued cells (no grid creation!)
+count = sparseGrid.count_positive_valued_cells()
 ```
-
-### `set_manhattan_neighborhoods_dense_grid(grid, seeds, max_distance, target_value=2)`
-Sets values in a 2D array for cells within Manhattan distance from seed points using BFS.
-
-**Parameters:**
-- `grid`: 2D numpy array (will be modified)
-- `seeds`: List of tuples (row, col) - seed positions
-- `max_distance`: Maximum Manhattan distance to fill
-- `target_value`: Value to set (default=2)
-
-**Returns:**
-- Modified grid with filled neighborhoods
-
-### `create_sparse_grid_dense_grid(height, width, locations)`
-Convenience function to create a new grid with specified locations set to 2.
-
-**Parameters:**
-- `height`: Number of rows
-- `width`: Number of columns
-- `locations`: List of tuples (row, col) indicating positions to set to 2
-
-**Returns:**
-- numpy.ndarray grid with 2 at specified locations
 
 ### `detect_available_accelerators()`
 Detects which hardware accelerators are available.
@@ -250,8 +226,8 @@ All methods are significantly faster than naive Python loops.
 
 For neighborhood counting operations:
 
-- **Direct counting** (`count_manhattan_neighborhoods_sparse_grid`): 3-6x faster than creating a grid
-- **BFS approach** (`set_manhattan_neighborhoods_dense_grid`): Optimal for sparse seeds, ~0.06ms for 2 seeds
+- **Direct counting** (`SparseGrid.count_positive_valued_cells()`): 3-6x faster than creating a grid
+- **BFS approach** (`DenseGrid.set_neighborhoods_to_value()`): Optimal for sparse seeds, ~0.06ms for 2 seeds
 - **Vectorized approach**: Best for dense seeds or large grids
 
 ### Performance Testing
@@ -282,7 +258,7 @@ For a seed at (5, 5) with L=3, BFS would fill a diamond-shaped pattern of all ce
 
 ### **Current Implementation (BFS - Recommended)**
 
-The `set_manhattan_neighborhoods_dense_grid()` function uses Breadth-First Search (BFS), which is **optimal for most cases**.
+The `DenseGrid.set_neighborhoods_to_value()` method uses Breadth-First Search (BFS), which is **optimal for most cases**.
 
 **Why BFS is optimal:**
 1. ✅ **Handles overlaps correctly** - Visited cells are never revisited
@@ -362,7 +338,7 @@ dilated = binary_dilation(seed_mask, iterations=L)
 
 ### **Why BFS is Optimal**
 
-The current implementation in `set_manhattan_neighborhoods_dense_grid()` uses BFS because:
+The current implementation in `DenseGrid.set_neighborhoods_to_value()` uses BFS because:
 
 1. **Automatic overlap handling** - Visited array prevents double-counting
 2. **Early termination** - Only processes cells within distance L
@@ -387,74 +363,68 @@ The current implementation in `set_manhattan_neighborhoods_dense_grid()` uses BF
 
 ```python
 import numpy as np
-from grid_counting import count_positive_valued_cells_in_2d_array
+from grid_counting import DenseGrid
 
 # Create a large random array
 large_array = np.random.rand(1000, 1000)
 
 # Count positive elements
-count = count_positive_valued_cells_in_2d_array(large_array)
+denseGrid = DenseGrid(large_array)
+count = denseGrid.count_positive_valued_cells()
 print(f"Positive count: {count}")
 ```
 
 ### Setting Locations
 
 ```python
-from grid_counting import set_locations_to_value_dense_grid, create_sparse_grid_dense_grid
+from grid_counting import DenseGrid
 
 # Create a grid with specific locations set to 2
 locations = [(0, 0), (1, 1), (2, 2)]
-grid = set_locations_to_value_dense_grid((5, 5), locations)
-print(grid)
+denseGrid = DenseGrid(5, 5)
+denseGrid.set_locations_to_value(locations, value=2)
+print(denseGrid.grid)
 # Output:
 # [[2 0 0 0 0]
 #  [0 2 0 0 0]
 #  [0 0 2 0 0]
 #  [0 0 0 0 0]
 #  [0 0 0 0 0]]
-
-# Or use the convenience function
-grid = create_sparse_grid_dense_grid(3, 3, [(0, 0), (2, 2)])
 ```
 
 ### Manhattan Neighborhoods
 
 ```python
-from grid_counting import count_manhattan_neighborhoods
+from grid_counting import SparseGrid, DenseGrid
 
 # Count without creating grid (OPTIMAL)
-count = count_manhattan_neighborhoods(
-    num_rows=100, num_cols=100,
-    seeds=[(10, 10), (20, 20)],
-    L=3
-)
+sparseGrid = SparseGrid(100, 100)
+sparseGrid.set_neighborhoods_to_value([(10, 10), (20, 20)], L=3, value=2)
+count = sparseGrid.count_positive_valued_cells()
 print(f"Cells in neighborhoods: {count}")
 
 # For visualization with grid
-from grid_counting import set_manhattan_neighborhoods_dense_grid
-
-grid = np.zeros((100, 100))
-seeds = [(10, 10), (20, 20)]
-set_manhattan_neighborhoods_dense_grid(grid, seeds, max_distance=3, target_value=2)
+denseGrid = DenseGrid(100, 100)
+locations = [(10, 10), (20, 20)]
+denseGrid.set_neighborhoods_to_value(locations, L=3, value=2)
 ```
 
 ### Complete Workflow
 
 ```python
-from grid_counting import set_locations_to_value_dense_grid, count_positive_valued_cells_in_2d_array, count_manhattan_neighborhoods_sparse_grid
+from grid_counting import DenseGrid, SparseGrid
 
 # Option 1: Count with grid creation
 active_locations = [(0, 0), (0, 4), (4, 0), (4, 4), (2, 2)]
-grid = set_locations_to_value((5, 5), active_locations)
-count = count_positive_valued_cells_in_2d_array(grid)
+denseGrid = DenseGrid(5, 5)
+denseGrid.set_locations_to_value(active_locations, value=2)
+count = denseGrid.count_positive_valued_cells()
 print(f"Active cells: {count}")
 
 # Option 2: Count without grid (FASTER!)
-count = count_manhattan_neighborhoods(
-    num_rows=5, num_cols=5,
-    seeds=active_locations,
-    L=0  # Exact locations only
-)
+sparseGrid = SparseGrid(5, 5)
+sparseGrid.set_locations_to_value(active_locations, value=2)
+count = sparseGrid.count_positive_valued_cells()
 print(f"Active cells: {count}")
 ```
 
@@ -462,7 +432,7 @@ print(f"Active cells: {count}")
 
 1. **Install GPU libraries**: For arrays larger than 1000×1000, GPU acceleration provides significant speedup
 2. **Use NumPy arrays**: Converting Python lists to NumPy arrays adds overhead
-3. **Use `count_manhattan_neighborhoods_sparse_grid`**: For counting only, don't create grids (3-6x faster)
+3. **Use `SparseGrid`**: For counting only, don't create grids (3-6x faster)
 4. **Batch operations**: For multiple arrays, consider batching operations
 
 ## Requirements

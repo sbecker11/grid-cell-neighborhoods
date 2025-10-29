@@ -63,8 +63,8 @@ def print_test_separator():
 
 def test_set_dense_grid_basic():
     """Test basic set_dense_grid functionality (now sets to 2)"""
-    grid = DenseGrid((3, 3))
-    grid.set_locations([(0, 0), (1, 1), (2, 2)])
+    grid = DenseGrid(3, 3)
+    grid.set_locations_to_value([(0, 0), (1, 1), (2, 2)])
     result = grid.grid
     expected = np.zeros((3, 3), dtype=np.int32)
     expected[0, 0] = 2
@@ -82,15 +82,15 @@ def test_set_dense_grid_basic():
         for line in ascii_lines[1:]:
             print(f"   {line}")
     grid = DenseGrid(result)
-    count = grid.count_positive_values()
+    count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Basic set_locations test passed")
 
 
 def test_set_dense_grid_empty():
     """Test with empty locations list"""
-    grid = DenseGrid((5, 5))
-    grid.set_locations([])
+    grid = DenseGrid(5, 5)
+    grid.set_locations_to_value([])
     result = grid.grid
     expected = np.zeros((5, 5), dtype=np.int32)
     assert np.array_equal(result, expected)
@@ -107,7 +107,7 @@ def test_set_dense_grid_empty():
             print(f"   {line}")
     
     grid = DenseGrid(result)
-    count = grid.count_positive_values()
+    count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Empty locations test passed")
 
@@ -115,8 +115,8 @@ def test_set_dense_grid_empty():
 def test_set_dense_grid_out_of_bounds():
     """Test with out-of-bounds locations (should be ignored)"""
     input_locations = [(0, 0), (10, 10), (-1, 0), (1, 1)]
-    grid = DenseGrid((3, 3))
-    grid.set_locations(input_locations)
+    grid = DenseGrid(3, 3)
+    grid.set_locations_to_value(input_locations)
     result = grid.grid
     expected = np.zeros((3, 3), dtype=np.int32)
     expected[0, 0] = 2
@@ -143,15 +143,15 @@ def test_set_dense_grid_out_of_bounds():
             print(f"   {line}")
     
     grid = DenseGrid(result)
-    count = grid.count_positive_values()
+    count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Out-of-bounds locations test passed")
 
 
 def test_set_dense_grid_single():
     """Test with single location"""
-    grid = DenseGrid((5, 5))
-    grid.set_locations([(2, 3)])
+    grid = DenseGrid(5, 5)
+    grid.set_locations_to_value([(2, 3)])
     result = grid.grid
     assert result[2, 3] == 2
     assert np.sum(result) == 2
@@ -168,7 +168,7 @@ def test_set_dense_grid_single():
             print(f"   {line}")
     
     grid = DenseGrid(result)
-    count = grid.count_positive_values()
+    count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Single location test passed")
 
@@ -176,8 +176,8 @@ def test_set_dense_grid_single():
 def test_set_dense_grid_multiple():
     """Test with multiple locations"""
     locations = [(0, 0), (0, 4), (4, 0), (4, 4), (2, 2)]
-    grid = DenseGrid((5, 5))
-    grid.set_locations(locations)
+    grid = DenseGrid(5, 5)
+    grid.set_locations_to_value(locations)
     result = grid.grid
     assert np.sum(result) == len(locations) * 2  # Each location set to 2
     for r, c in locations:
@@ -193,7 +193,7 @@ def test_set_dense_grid_multiple():
         for line in ascii_lines[1:]:
             print(f"   {line}")
     grid = DenseGrid(result)
-    count = grid.count_positive_values()
+    count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Multiple locations test passed")
 
@@ -203,7 +203,7 @@ def test_set_dense_grid_modify_existing():
     existing = np.zeros((3, 3), dtype=np.int32)
     existing[0, 0] = 5  # Set an existing value
     grid = DenseGrid(existing)
-    grid.set_locations([(1, 1)])
+    grid.set_locations_to_value([(1, 1)])
     result = grid.grid
     assert result[0, 0] == 5  # Original value preserved
     assert result[1, 1] == 2  # New location set to 2
@@ -219,15 +219,15 @@ def test_set_dense_grid_modify_existing():
         for line in ascii_lines[1:]:
             print(f"   {line}")
     grid = DenseGrid(result)
-    count = grid.count_positive_values()
+    count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Modify existing array test passed")
 
 
 def test_set_dense_grid_from_sparse_locations():
     """Test creating dense grid from sparse locations"""
-    grid = DenseGrid((4, 4))
-    grid.set_locations([(0, 0), (3, 3)])
+    grid = DenseGrid(4, 4)
+    grid.set_locations_to_value([(0, 0), (3, 3)])
     result = grid.grid
     assert result.shape == (4, 4)
     assert result[0, 0] == 2
@@ -244,7 +244,7 @@ def test_set_dense_grid_from_sparse_locations():
         for line in ascii_lines[1:]:
             print(f"   {line}")
     grid = DenseGrid(result)
-    count = grid.count_positive_values()
+    count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Create sparse grid test passed")
 
@@ -254,7 +254,7 @@ def test_count_dense_grid_basic():
     """Test basic count_nonzero functionality (counts only positive values)"""
     array = np.array([[1, 0, 2], [0, 3, 0], [4, 0, 5]])
     grid = DenseGrid(array)
-    result = grid.count_positive_values()
+    result = grid.count_positive_valued_cells()
     assert result == 5  # All are positive
     ascii = render_grid(array)
     if ascii:
@@ -274,7 +274,7 @@ def test_count_dense_grid_all_zeros():
     """Test count_nonzero with all zeros"""
     array = np.zeros((3, 3))
     grid = DenseGrid(array)
-    result = grid.count_positive_values()
+    result = grid.count_positive_valued_cells()
     assert result == 0  # No positive values
     ascii = render_grid(array)
     if ascii:
@@ -294,7 +294,7 @@ def test_count_dense_grid_all_nonzero():
     """Test count_nonzero with all positive values"""
     array = np.ones((3, 3))
     grid = DenseGrid(array)
-    result = grid.count_positive_values()
+    result = grid.count_positive_valued_cells()
     assert result == 9  # All are positive
     ascii = render_grid(array)
     if ascii:
@@ -312,9 +312,9 @@ def test_count_dense_grid_all_nonzero():
 
 def test_count_dense_grid_with_set_dense_grid():
     """Test count_nonzero with set_dense_grid (values set to 2 = positive)"""
-    grid = DenseGrid((5, 5))
-    grid.set_locations([(0, 0), (1, 1), (2, 2)])
-    count = grid.count_positive_values()
+    grid = DenseGrid(5, 5)
+    grid.set_locations_to_value([(0, 0), (1, 1), (2, 2)])
+    count = grid.count_positive_valued_cells()
     assert count == 3  # 2 is positive
     ascii = render_grid(grid)
     if ascii:
@@ -334,7 +334,7 @@ def test_count_dense_grid_excludes_negatives():
     """Test that negative values are excluded"""
     array = np.array([[1, -1, 0, 2], [0, -3, 1, 0], [-5, 0, 3, 0]])
     grid = DenseGrid(array)
-    result = grid.count_positive_values()
+    result = grid.count_positive_valued_cells()
     assert result == 4  # Only positive: 1, 2, 1, 3 (negatives and zeros excluded)
     
     # Render with custom symbols for negatives using cell renderer
@@ -363,12 +363,12 @@ def test_count_dense_grid_excludes_negatives():
 def test_set_dense_grid_neighborhoods_overlapping():
     """Test that overlapping neighborhoods are counted correctly (no double counting)"""
     # Create grid with two seeds that are close together (within L=2 of each other)
-    grid = DenseGrid((8, 8))
+    grid = DenseGrid(8, 8)
     seeds = [(2, 2), (3, 3)]  # Seeds at (2,2) and (3,3) - Manhattan distance = 2
-    grid.set_neighborhoods(seeds, max_distance=2, target_value=2)
+    grid.set_neighborhoods_to_value(seeds, L=2, value=2)
     
     # Count should count all positive values, not double-count overlapping regions
-    count = grid.count_positive_values()
+    count = grid.count_positive_valued_cells()
     
     # Calculate expected count: positive-valued cells in both neighborhoods
     # Seed 1 at (2,2): creates neighborhood with cells within distance 2
@@ -416,12 +416,12 @@ def test_set_dense_grid_neighborhoods_overlapping():
 def test_set_dense_grid_neighborhoods_non_overlapping():
     """Test two seeds with Manhattan distance > L (non-overlapping neighborhoods)"""
     # Create grid with two seeds that are far apart (distance > L)
-    grid = DenseGrid((10, 10))
+    grid = DenseGrid(10, 10)
     seeds = [(2, 2), (7, 7)]  # Seeds at (2,2) and (7,7) - Manhattan distance = 10
-    grid.set_neighborhoods(seeds, max_distance=2, target_value=2)
+    grid.set_neighborhoods_to_value(seeds, L=2, value=2)
     
     # Count should count positive-valued cells from both neighborhoods
-    count = grid.count_positive_values()
+    count = grid.count_positive_valued_cells()
     
     # Calculate expected count: 
     # Each seed has L=2 neighborhood with ~13 cells
@@ -460,16 +460,105 @@ def test_set_dense_grid_neighborhoods_non_overlapping():
     print("✓ Non-overlapping Manhattan neighborhoods test passed")
 
 
+def test_set_neighborhoods_preserves_already_set_cells():
+    """Test that set_neighborhoods_to_value only sets unset cells (preserves existing values)"""
+    grid = DenseGrid(5, 5)
+    
+    # First, set some initial values
+    grid.set_locations_to_value([(1, 1), (3, 3)], value=5)
+    
+    # Now set neighborhoods around (2, 2) which overlaps with (1, 1) and (3, 3)
+    # With L=2, the neighborhood should include cells around (2,2) but NOT overwrite
+    # the already-set cells at (1,1) and (3,3)
+    grid.set_neighborhoods_to_value([(2, 2)], L=2, value=2)
+    
+    # Verify that (1,1) and (3,3) still have value 5 (not overwritten)
+    assert grid.grid[1, 1] == 5, "Cell (1,1) should preserve its value 5"
+    assert grid.grid[3, 3] == 5, "Cell (3,3) should preserve its value 5"
+    
+    # Verify that (2,2) and its unset neighbors got set to 2
+    assert grid.grid[2, 2] == 2, "Seed location (2,2) should be set to 2"
+    
+    # Count positive values - should include both the preserved 5s and the new 2s
+    count = grid.count_positive_valued_cells()
+    assert count >= 2, "Should count at least the preserved values"
+    
+    print()
+    print("=" * 70)
+    print("TEST: set_neighborhoods_to_value preserves already-set cells")
+    print("=" * 70)
+    
+    def render_cell(r, c, val):
+        if (r, c) == (2, 2):
+            return ' @ '  # Seed
+        elif val == 5:
+            return ' 5 '  # Preserved value
+        elif val == 2:
+            return ' * '  # Newly set in neighborhood
+        else:
+            return ' . '  # Unset
+    
+    ascii = render_grid(grid.grid, max_size=10, cell_renderer=render_cell)
+    ascii_lines = ascii.split('\n')
+    print(ascii_lines[0])
+    for line in ascii_lines[1:]:
+        print(f"   {line}")
+    
+    print(f"   Cell (1,1) value: {grid.grid[1, 1]} (preserved from initial set)")
+    print(f"   Cell (3,3) value: {grid.grid[3, 3]} (preserved from initial set)")
+    print(f"   Cell (2,2) value: {grid.grid[2, 2]} (set by set_neighborhoods_to_value)")
+    print(f"   Positive count: {count}")
+    print("✓ Preserves already-set cells test passed")
+
+
+def test_set_to_zero_overwrites_all_cells():
+    """Test that setting value=0 overwrites all cells regardless of current value"""
+    grid = DenseGrid(5, 5)
+    
+    # First, set some values
+    grid.set_locations_to_value([(1, 1), (2, 2), (3, 3)], value=5)
+    assert grid.grid[1, 1] == 5
+    assert grid.grid[2, 2] == 5
+    assert grid.grid[3, 3] == 5
+    
+    # Now set neighborhoods that will include these locations
+    grid.set_neighborhoods_to_value([(2, 2)], L=2, value=3)
+    # All cells in neighborhood should be set to 3 (or remain 5 if already set)
+    
+    # Now clear with value=0 - should overwrite ALL cells in neighborhood
+    grid.set_neighborhoods_to_value([(2, 2)], L=2, value=0)
+    
+    # Verify that all cells in neighborhood are now 0, even those that were 5
+    assert grid.grid[1, 1] == 0, "Cell (1,1) should be cleared to 0"
+    assert grid.grid[2, 2] == 0, "Cell (2,2) should be cleared to 0"
+    assert grid.grid[3, 3] == 0, "Cell (3,3) should be cleared to 0"
+    
+    # Test set_locations_to_value with value=0
+    grid.set_locations_to_value([(0, 0)], value=7)
+    assert grid.grid[0, 0] == 7
+    
+    grid.set_locations_to_value([(0, 0)], value=0)
+    assert grid.grid[0, 0] == 0, "Setting value=0 should clear cell"
+    
+    print()
+    print("=" * 70)
+    print("TEST: set_X_to_value with value=0 overwrites all cells")
+    print("=" * 70)
+    print("✓ Setting value=0 clears all appropriate cells regardless of current value")
+    print("✓ Set to zero overwrites test passed")
+
+
 def test_sparse_grid_class():
     """Test SparseGrid class functionality"""
     # Create a SparseGrid
-    sparse = SparseGrid(100, 100, [(10, 10), (20, 20)], L=3)
+    sparse = SparseGrid(100, 100)
+    sparse.set_neighborhoods_to_value([(10, 10), (20, 20)], L=3, value=2)
     assert sparse.num_rows == 100
     assert sparse.num_cols == 100
     assert len(sparse.locations) == 2
     
     # Count should work with L=3
-    count = sparse.count_positive_values()
+    count = sparse.count_positive_valued_cells()
     assert count > 0  # Should have some cells within L=3 of seeds
     
     print()
@@ -505,7 +594,7 @@ def test_counting_performance_small():
     
     start = time.perf_counter()
     grid = DenseGrid(array)
-    result = grid.count_positive_values()
+    result = grid.count_positive_valued_cells()
     elapsed = time.perf_counter() - start
     
     assert result > 0, "Should count some positive values"
@@ -529,8 +618,9 @@ def test_manhattan_performance_comparison():
     times_direct = []
     for _ in range(3):
         start = time.perf_counter()
-        sparse = SparseGrid(100, 100, seeds, L=L)
-        count_direct = sparse.count()
+        sparse = SparseGrid(100, 100)
+        sparse.set_neighborhoods_to_value(seeds, L=L, value=2)
+        count_direct = sparse.count_positive_valued_cells()
         times_direct.append(time.perf_counter() - start)
     
     avg_direct = np.mean(times_direct)
@@ -538,10 +628,10 @@ def test_manhattan_performance_comparison():
     # Grid creation + count
     times_grid = []
     for _ in range(3):
-        grid = DenseGrid((100, 100))
+        grid = DenseGrid(100, 100)
         start = time.perf_counter()
-        grid.set_neighborhoods(seeds, max_distance=L, target_value=2)
-        count_grid = grid.count()
+        grid.set_neighborhoods_to_value(seeds, L=L, value=2)
+        count_grid = grid.count_positive_valued_cells()
         times_grid.append(time.perf_counter() - start)
     
     avg_grid = np.mean(times_grid)
@@ -559,8 +649,9 @@ def test_manhattan_performance_comparison():
 def test_example_1_n3_centered():
     """Example 1: One positive cell fully contained; N=3"""
     # According to Counting_grid-cell_neighborhoods.txt: 25 cells in N=3 neighborhood
-    sparse = SparseGrid(11, 11, [(5, 5)], L=3)
-    count = sparse.count_positive_values()
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(5, 5)], L=3, value=2)
+    count = sparse.count_positive_valued_cells()
     
     # Formula for cells in Manhattan diamond: cells = (2*N+1)^2 - N*(N+1) for N=3
     # Actually: sum from d=0 to N of 4d+1 cells at distance d
@@ -579,8 +670,9 @@ def test_example_1_n3_centered():
 def test_example_2_n3_near_edge():
     """Example 2: One positive cell near an edge; N=3"""
     # According to Counting_grid-cell_neighborhoods.txt: 21 cells (25 - 4 that fell off edge)
-    sparse = SparseGrid(11, 11, [(5, 2)], L=3)
-    count = sparse.count_positive_values()
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(5, 2)], L=3, value=2)
+    count = sparse.count_positive_valued_cells()
     
     # Near left edge at column 2, some cells fall off
     assert count == 24, f"Expected 24 cells for N=3 near edge, got {count}"
@@ -597,8 +689,9 @@ def test_example_2_n3_near_edge():
 def test_example_3_n2_disjoint():
     """Example 3: Two positive values with disjoint neighborhoods; N=2"""
     # According to Counting_grid-cell_neighborhoods.txt: 26 cells total (13 per neighborhood)
-    sparse = SparseGrid(11, 11, [(2, 2), (8, 8)], L=2)
-    count = sparse.count_positive_values()
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(2, 2), (8, 8)], L=2, value=2)
+    count = sparse.count_positive_valued_cells()
     
     # Two disjoint neighborhoods: 13 cells each = 26 total
     assert count == 26, f"Expected 26 cells for N=2 disjoint neighborhoods, got {count}"
@@ -616,8 +709,9 @@ def test_example_4_n2_overlapping():
     """Example 4: Two positive values with overlapping neighborhoods; N=2"""
     # According to Counting_grid-cell_neighborhoods.txt: 22 cells (overlapping)
     # Place seeds close enough that neighborhoods overlap
-    sparse = SparseGrid(11, 11, [(5, 5), (6, 6)], L=2)
-    count = sparse.count_positive_values()
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(5, 5), (6, 6)], L=2, value=2)
+    count = sparse.count_positive_valued_cells()
     
     # Should be less than 26 (disjoint case) due to overlap
     assert count < 26, "Overlapping neighborhoods should count less than disjoint"
@@ -634,8 +728,9 @@ def test_example_4_n2_overlapping():
 
 def test_edge_case_corner():
     """Edge case: Positive value in a corner"""
-    sparse = SparseGrid(11, 11, [(0, 0)], L=2)
-    count = sparse.count_positive_values()
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(0, 0)], L=2, value=2)
+    count = sparse.count_positive_valued_cells()
     
     # Should be fewer than centered case due to corner
     assert count < 13, "Corner placement should reduce neighborhood size"
@@ -652,8 +747,9 @@ def test_edge_case_corner():
 
 def test_edge_case_odd_shaped_1x21():
     """Edge case: Odd shaped array 1x21"""
-    sparse = SparseGrid(1, 21, [(0, 10)], L=3)
-    count = sparse.count_positive_values()
+    sparse = SparseGrid(1, 21)
+    sparse.set_neighborhoods_to_value([(0, 10)], L=3, value=2)
+    count = sparse.count_positive_valued_cells()
     
     # Single row, neighborhood spreads horizontally
     # At L=3, can reach cells from 10-3 to 10+3 = columns 7 to 13
@@ -671,8 +767,9 @@ def test_edge_case_odd_shaped_1x21():
 
 def test_edge_case_odd_shaped_1x1():
     """Edge case: Smallest array 1x1"""
-    sparse = SparseGrid(1, 1, [(0, 0)], L=10)
-    count = sparse.count_positive_values()
+    sparse = SparseGrid(1, 1)
+    sparse.set_neighborhoods_to_value([(0, 0)], L=10, value=2)
+    count = sparse.count_positive_valued_cells()
     
     # Only one cell total, so count should be 1
     assert count == 1, f"Expected 1 cell for 1x1 array, got {count}"
@@ -688,8 +785,9 @@ def test_edge_case_odd_shaped_1x1():
 
 def test_edge_case_odd_shaped_10x1():
     """Edge case: Long vertical array 10x1"""
-    sparse = SparseGrid(10, 1, [(5, 0)], L=3)
-    count = sparse.count_positive_values()
+    sparse = SparseGrid(10, 1)
+    sparse.set_neighborhoods_to_value([(5, 0)], L=3, value=2)
+    count = sparse.count_positive_valued_cells()
     
     # Single column, neighborhood spreads vertically
     # At L=3, from row 5-3 to 5+3 = rows 2 to 8
@@ -707,8 +805,9 @@ def test_edge_case_odd_shaped_10x1():
 
 def test_edge_case_odd_shaped_2x2():
     """Edge case: Small square 2x2"""
-    sparse = SparseGrid(2, 2, [(0, 0)], L=2)
-    count = sparse.count_positive_values()
+    sparse = SparseGrid(2, 2)
+    sparse.set_neighborhoods_to_value([(0, 0)], L=2, value=2)
+    count = sparse.count_positive_valued_cells()
     
     # With L=2 in a 2x2 grid, should get all 4 cells
     assert count == 4, f"Expected 4 cells for 2x2 array, got {count}"
@@ -724,8 +823,9 @@ def test_edge_case_odd_shaped_2x2():
 
 def test_edge_case_n0():
     """Edge case: N=0 (only seed cells)"""
-    sparse = SparseGrid(11, 11, [(5, 5), (2, 2)], L=0)
-    count = sparse.count_positive_values()
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(5, 5), (2, 2)], L=0, value=2)
+    count = sparse.count_positive_valued_cells()
     
     # With L=0, should only count the seeds themselves
     assert count == 2, f"Expected 2 cells for N=0, got {count}"
@@ -741,8 +841,9 @@ def test_edge_case_n0():
 
 def test_edge_case_large_n():
     """Edge case: N >> max(W, H)"""
-    sparse = SparseGrid(11, 11, [(5, 5)], L=100)
-    count = sparse.count_positive_values()
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(5, 5)], L=100, value=2)
+    count = sparse.count_positive_valued_cells()
     
     # With L=100 in an 11x11 grid, should count all 121 cells
     assert count == 121, f"Expected 121 cells for N=100 in 11x11, got {count}"
@@ -765,28 +866,28 @@ def test_edge_case_zero_dimensions():
     
     # Test zero rows
     try:
-        sparse = SparseGrid(0, 10, [], L=3)
+        sparse = SparseGrid(0, 10)
         assert False, "Should have raised ValueError for 0 rows"
     except ValueError as e:
         print(f"   ✓ Correctly rejected 0x10 grid: {e}")
     
     # Test zero columns
     try:
-        sparse = SparseGrid(10, 0, [], L=3)
+        sparse = SparseGrid(10, 0)
         assert False, "Should have raised ValueError for 0 columns"
     except ValueError as e:
         print(f"   ✓ Correctly rejected 10x0 grid: {e}")
     
     # Test zero by zero
     try:
-        sparse = SparseGrid(0, 0, [], L=3)
+        sparse = SparseGrid(0, 0)
         assert False, "Should have raised ValueError for 0x0 grid"
     except ValueError as e:
         print(f"   ✓ Correctly rejected 0x0 grid: {e}")
     
     # Test negative dimensions
     try:
-        sparse = SparseGrid(-5, 10, [], L=3)
+        sparse = SparseGrid(-5, 10)
         assert False, "Should have raised ValueError for negative rows"
     except ValueError as e:
         print(f"   ✓ Correctly rejected -5x10 grid: {e}")
@@ -814,6 +915,8 @@ def run_all_tests():
         test_count_dense_grid_excludes_negatives()
         test_set_dense_grid_neighborhoods_overlapping()
         test_set_dense_grid_neighborhoods_non_overlapping()
+        test_set_neighborhoods_preserves_already_set_cells()
+        test_set_to_zero_overwrites_all_cells()
         test_sparse_grid_class()
         
         # Project requirement examples

@@ -10,9 +10,9 @@ in a 2D array with H rows by W cols, where H and W are > 0 and element values ar
 
 QUICK START:
     >>> from grid_counting import SparseGrid
-    >>> grid = SparseGrid(num_rows=100, num_cols=100, 
-    ...                            locations=[(10, 10), (20, 20)], L=3)
-    >>> count = grid.count_positive_values()
+    >>> grid = SparseGrid(height=100, width=100)
+    >>> grid.set_neighborhoods_to_value(locations=[(10, 10), (20, 20)], L=3, value=2)
+    >>> count = grid.count_positive_valued_cells()
     >>> # Returns count of positive-valued cells within Manhattan distance L from all seeds
 """
 
@@ -25,24 +25,31 @@ _accelerator_message_printed = False
 class DenseGrid:
     """A dense 2D grid represented as a numpy array."""
     
-    def __init__(self, shape_or_array, initial_value=0):
+    def __init__(self, height, width=None, initial_value=0):
         """
-        Create a DenseGrid from a shape or existing array.
+        Create a DenseGrid from dimensions or existing array.
         
         Args:
-            shape_or_array: Either a tuple (rows, cols) or existing numpy array
+            height: Number of rows, or existing numpy array, or tuple (height, width)
+            width: Number of columns (required if height is an integer)
             initial_value: Value to fill if creating new grid (default=0)
         """
-        if isinstance(shape_or_array, tuple):
-            if shape_or_array[0] <= 0 or shape_or_array[1] <= 0:
-                raise ValueError(f"Grid dimensions must be > 0, got {shape_or_array}")
-            self.grid = np.full(shape_or_array, initial_value, dtype=np.int32)
-        else:
-            self.grid = np.asarray(shape_or_array).copy()
+        # Support legacy tuple format: DenseGrid((height, width))
+        if width is None and isinstance(height, tuple):
+            height, width = height
+        
+        # Support existing array: DenseGrid(array)
+        if width is None:
+            self.grid = np.asarray(height).copy()
             if self.grid.size == 0 or len(self.grid.shape) != 2 or self.grid.shape[0] <= 0 or self.grid.shape[1] <= 0:
                 raise ValueError(f"Grid must be 2D with dimensions > 0, got shape {self.grid.shape}")
+        else:
+            # New grid from dimensions: DenseGrid(height, width)
+            if height <= 0 or width <= 0:
+                raise ValueError(f"Grid dimensions must be > 0, got {height}x{width}")
+            self.grid = np.full((height, width), initial_value, dtype=np.int32)
     
-    def set_locations(self, locations, value=2):
+    def set_locations_to_value(self, locations, value=2):
         """Set specified locations to a value."""
         import numpy as np
         
@@ -75,11 +82,19 @@ class DenseGrid:
         col_indices = valid_locations[:, 1]
         
         result = np.array(self.grid, copy=True)
-        result[row_indices, col_indices] = value
+        # If value is 0, set regardless of current value (clear/reset)
+        # Otherwise, only set if cell is currently unset (0)
+        if value == 0:
+            result[row_indices, col_indices] = value
+        else:
+            # Only set unset cells (value == 0)
+            mask = result[row_indices, col_indices] == 0
+            if np.any(mask):
+                result[row_indices[mask], col_indices[mask]] = value
         self.grid = result
         return self
     
-    def set_neighborhoods(self, seeds, max_distance=3, target_value=2):
+    def set_neighborhoods_to_value(self, locations, L=3, value=2):
         """Set neighborhoods around seeds using BFS."""
         from collections import deque
         
@@ -87,16 +102,19 @@ class DenseGrid:
         rows, cols = self.grid.shape
         
         # Mark all seed locations
-        for seed_row, seed_col in seeds:
+        # If value is 0, set regardless of current value (clear/reset)
+        # Otherwise, only set if cell is currently unset (0)
+        for seed_row, seed_col in locations:
             if 0 <= seed_row < rows and 0 <= seed_col < cols:
-                result[seed_row, seed_col] = target_value
+                if value == 0 or result[seed_row, seed_col] == 0:
+                    result[seed_row, seed_col] = value
         
         # BFS from each seed to fill neighborhoods
         visited = np.zeros_like(self.grid, dtype=bool)
         queue = deque()
         
         # Initialize queue with all seeds at distance 0
-        for seed_row, seed_col in seeds:
+        for seed_row, seed_col in locations:
             if 0 <= seed_row < rows and 0 <= seed_col < cols:
                 visited[seed_row, seed_col] = True
                 queue.append((seed_row, seed_col, 0))
@@ -106,7 +124,7 @@ class DenseGrid:
             r, c, dist = queue.popleft()
             
             # Skip if distance exceeds max
-            if dist >= max_distance:
+            if dist >= L:
                 continue
             
             # Add neighbors (Manhattan neighbors: up, down, left, right)
@@ -114,16 +132,21 @@ class DenseGrid:
                 nr, nc = r + dr, c + dc
                 
                 # Check bounds and visited
-                if (0 <= nr < rows and 0 <= nc < cols and not visited[nr, nc]):
+                if not (0 <= nr < rows and 0 <= nc < cols and not visited[nr, nc]):
+                    continue
+                
+                # If value is 0, set regardless of current value (clear/reset)
+                # Otherwise, only set if cell is currently unset (0)
+                if value == 0 or result[nr, nc] == 0:
                     visited[nr, nc] = True
-                    result[nr, nc] = target_value
+                    result[nr, nc] = value
                     queue.append((nr, nc, dist + 1))
         
         self.grid = result
         return self
     
-    def count_positive_values(self):
-        """Count positive values in the grid using hardware acceleration."""
+    def count_positive_valued_cells(self):
+        """Count positive-valued cells in the grid using hardware acceleration."""
         import numpy as np
         
         # Convert to numpy array
@@ -200,30 +223,37 @@ class DenseGrid:
 class SparseGrid:
     """A sparse grid represented as a tuple (rows, cols, locations, values, L)."""
     
-    def __init__(self, num_rows, num_cols, locations, values=None, L=0):
+    def __init__(self, height, width):
         """
         Create a SparseGrid.
         
         Args:
-            num_rows: Number of rows (must be > 0)
-            num_cols: Number of columns (must be > 0)
-            locations: List of (row, col) tuples
-            values: List of values (defaults to 2 for all)
-            L: Manhattan distance for neighborhood expansion
+            height: Number of rows (must be > 0)
+            width: Number of columns (must be > 0)
         """
-        if num_rows <= 0 or num_cols <= 0:
-            raise ValueError(f"Grid dimensions must be > 0, got {num_rows}x{num_cols}")
+        if height <= 0 or width <= 0:
+            raise ValueError(f"Grid dimensions must be > 0, got {height}x{width}")
         
-        self.num_rows = num_rows
-        self.num_cols = num_cols
-        self.locations = locations
-        if values is None:
-            self.values = [2] * len(locations)
-        else:
-            self.values = values
-        self.L = L
+        self.num_rows = height
+        self.num_cols = width
+        self.locations = []
+        self.values = []
+        self.L = 0
     
-    def count_positive_values(self):
+    def set_locations_to_value(self, locations, value=2):
+        """Set locations and their values in the sparse grid."""
+        self.locations = locations
+        self.values = [value] * len(locations) if locations else []
+        return self
+    
+    def set_neighborhoods_to_value(self, locations, L, value=2):
+        """Set neighborhoods around locations and update L value."""
+        self.locations = locations
+        self.L = L
+        self.values = [value] * len(locations) if locations else []
+        return self
+    
+    def count_positive_valued_cells(self):
         """Count positive-valued cells in the sparse grid without creating grid."""
         positive_cells = set()
         
