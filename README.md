@@ -2,6 +2,12 @@
 
 This project provides highly optimized Python functions for counting positive values in 2D arrays, automatically detecting and using the fastest available hardware accelerators (GPU/TPU via JAX or PyTorch, or optimized CPU via NumPy).
 
+## 🌐 Interactive Test Runner
+
+**Try it in your browser:** [https://sbecker11.github.io/grid-cell-neighborhoods/](https://sbecker11.github.io/grid-cell-neighborhoods/)
+
+Run all unit tests interactively in your browser using Pyodide (Python compiled to WebAssembly). No installation required!
+
 ## Files
 
 - **`grid_counting.py`** - Main module with all counting and Manhattan neighborhood functions
@@ -45,7 +51,7 @@ python -m venv venv && source venv/bin/activate && pip install -r requirements.t
 ## Examples
 
 ```python
-from grid_counting import count_positive_valued_cells_in_2d_array, set_locations_to_value_full_grid, count_manhattan_neighborhoods_sparse_grid
+from grid_counting import count_positive_valued_cells_in_2d_array, set_locations_to_value_dense_grid, count_manhattan_neighborhoods_sparse_grid
 
 # Count positive values in a 2D array
 my_2d_array = np.array([
@@ -57,7 +63,7 @@ count = count_positive_valued_cells_in_2d_array(my_2d_array)  # Returns 5
 
 # Set specific locations to 2
 num_rows, num_cols = 5, 5
-grid = set_locations_to_value_full_grid((num_rows, num_cols), [(0, 0), (1, 1), (2, 2)], value=2)
+grid = set_locations_to_value_dense_grid((num_rows, num_cols), [(0, 0), (1, 1), (2, 2)], value=2)
 
 # Count Manhattan neighborhoods (OPTIMAL - no grid creation)
 count = count_manhattan_neighborhoods(
@@ -79,7 +85,7 @@ Counts positive values in a 2D array using the fastest available hardware.
 **Returns:**
 - Count of elements > 0
 
-### `set_locations_to_value_full_grid(shape_or_array, locations, value=2)`
+### `set_locations_to_value_dense_grid(shape_or_array, locations, value=2)`
 Efficiently sets specified locations in a 2D array to a value.
 
 **Parameters:**
@@ -95,10 +101,10 @@ Efficiently sets specified locations in a 2D array to a value.
 import numpy as np
 
 # Create new grid with locations set to 2
-grid = set_locations_to_value_full_grid((5, 5), [(0, 0), (2, 2), (4, 4)], value=2)
+grid = set_locations_to_value_dense_grid((5, 5), [(0, 0), (2, 2), (4, 4)], value=2)
 
 # Set locations to a different value
-grid = set_locations_to_value_full_grid(grid, [(1, 1), (3, 3)], value=5)
+grid = set_locations_to_value_dense_grid(grid, [(1, 1), (3, 3)], value=5)
 ```
 
 ### `count_manhattan_neighborhoods_sparse_grid(num_rows, num_cols, seeds, L)`
@@ -135,7 +141,7 @@ count = count_manhattan_neighborhoods(
 # Returns count of positive-valued cells within L=5 from all seeds
 ```
 
-### `set_manhattan_neighborhoods_full_grid(grid, seeds, max_distance, target_value=2)`
+### `set_manhattan_neighborhoods_dense_grid(grid, seeds, max_distance, target_value=2)`
 Sets values in a 2D array for cells within Manhattan distance from seed points using BFS.
 
 **Parameters:**
@@ -147,7 +153,7 @@ Sets values in a 2D array for cells within Manhattan distance from seed points u
 **Returns:**
 - Modified grid with filled neighborhoods
 
-### `create_sparse_grid_full_grid(height, width, locations)`
+### `create_sparse_grid_dense_grid(height, width, locations)`
 Convenience function to create a new grid with specified locations set to 2.
 
 **Parameters:**
@@ -179,7 +185,7 @@ All methods are significantly faster than naive Python loops.
 For neighborhood counting operations:
 
 - **Direct counting** (`count_manhattan_neighborhoods_sparse_grid`): 3-6x faster than creating a grid
-- **BFS approach** (`set_manhattan_neighborhoods_full_grid`): Optimal for sparse seeds, ~0.06ms for 2 seeds
+- **BFS approach** (`set_manhattan_neighborhoods_dense_grid`): Optimal for sparse seeds, ~0.06ms for 2 seeds
 - **Vectorized approach**: Best for dense seeds or large grids
 
 ### Performance Testing
@@ -210,7 +216,7 @@ For a seed at (5, 5) with L=3, BFS would fill a diamond-shaped pattern of all ce
 
 ### **Current Implementation (BFS - Recommended)**
 
-The `set_manhattan_neighborhoods_full_grid()` function uses Breadth-First Search (BFS), which is **optimal for most cases**.
+The `set_manhattan_neighborhoods_dense_grid()` function uses Breadth-First Search (BFS), which is **optimal for most cases**.
 
 **Why BFS is optimal:**
 1. ✅ **Handles overlaps correctly** - Visited cells are never revisited
@@ -290,7 +296,7 @@ dilated = binary_dilation(seed_mask, iterations=L)
 
 ### **Why BFS is Optimal**
 
-The current implementation in `set_manhattan_neighborhoods_full_grid()` uses BFS because:
+The current implementation in `set_manhattan_neighborhoods_dense_grid()` uses BFS because:
 
 1. **Automatic overlap handling** - Visited array prevents double-counting
 2. **Early termination** - Only processes cells within distance L
@@ -328,11 +334,11 @@ print(f"Positive count: {count}")
 ### Setting Locations
 
 ```python
-from grid_counting import set_locations_to_value_full_grid, create_sparse_grid_full_grid
+from grid_counting import set_locations_to_value_dense_grid, create_sparse_grid_dense_grid
 
 # Create a grid with specific locations set to 2
 locations = [(0, 0), (1, 1), (2, 2)]
-grid = set_locations_to_value_full_grid((5, 5), locations)
+grid = set_locations_to_value_dense_grid((5, 5), locations)
 print(grid)
 # Output:
 # [[2 0 0 0 0]
@@ -342,7 +348,7 @@ print(grid)
 #  [0 0 0 0 0]]
 
 # Or use the convenience function
-grid = create_sparse_grid_full_grid(3, 3, [(0, 0), (2, 2)])
+grid = create_sparse_grid_dense_grid(3, 3, [(0, 0), (2, 2)])
 ```
 
 ### Manhattan Neighborhoods
@@ -359,17 +365,17 @@ count = count_manhattan_neighborhoods(
 print(f"Cells in neighborhoods: {count}")
 
 # For visualization with grid
-from grid_counting import set_manhattan_neighborhoods_full_grid
+from grid_counting import set_manhattan_neighborhoods_dense_grid
 
 grid = np.zeros((100, 100))
 seeds = [(10, 10), (20, 20)]
-set_manhattan_neighborhoods_full_grid(grid, seeds, max_distance=3, target_value=2)
+set_manhattan_neighborhoods_dense_grid(grid, seeds, max_distance=3, target_value=2)
 ```
 
 ### Complete Workflow
 
 ```python
-from grid_counting import set_locations_to_value_full_grid, count_positive_valued_cells_in_2d_array, count_manhattan_neighborhoods_sparse_grid
+from grid_counting import set_locations_to_value_dense_grid, count_positive_valued_cells_in_2d_array, count_manhattan_neighborhoods_sparse_grid
 
 # Option 1: Count with grid creation
 active_locations = [(0, 0), (0, 4), (4, 0), (4, 4), (2, 2)]

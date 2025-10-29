@@ -44,6 +44,23 @@
             opacity: 0.9;
         }
 
+        .header-info {
+            margin-top: 15px;
+            font-size: 0.9em;
+            opacity: 0.85;
+            line-height: 1.6;
+        }
+
+        .header-info a {
+            color: white;
+            text-decoration: underline;
+            opacity: 0.9;
+        }
+
+        .header-info a:hover {
+            opacity: 1;
+        }
+
         .content {
             padding: 30px;
         }
@@ -147,11 +164,57 @@
             color: #333;
         }
 
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 5px;
+        }
+
+        .page-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            font-size: 0.95em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .page-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            font-weight: 600;
+            color: #333;
+            min-width: 100px;
+            text-align: center;
+        }
+
         .footer {
             text-align: center;
             padding: 20px;
             color: #666;
             font-size: 0.9em;
+        }
+
+        .footer .powered-by {
+            font-size: 0.75em;
+            opacity: 0.7;
+            margin-top: 10px;
         }
 
         @keyframes spin {
@@ -180,7 +243,12 @@
     <div class="container">
         <div class="header">
             <h1>🧪 Grid Cell Neighborhoods</h1>
-            <p>Interactive Test Runner - Powered by Pyodide</p>
+            <p>Interactive Test Runner</p>
+            <div class="header-info">
+                author: Shawn Becker <a href="https://github.com/sbecker11" target="_blank">@https://github.com/sbecker11</a><br>
+                github repo: <a href="https://github.com/sbecker11/grid-cell-neighborhoods" target="_blank">@https://github.com/sbecker11/grid-cell-neighborhoods</a><br>
+                github-pages: <a href="https://sbecker11.github.io/grid-cell-neighborhoods/" target="_blank">@https://sbecker11.github.io/grid-cell-neighborhoods/</a>
+            </div>
         </div>
         
         <div class="content">
@@ -192,6 +260,11 @@
             
             <div class="test-summary">
                 <h3>Test Execution Output</h3>
+                <div id="pagination" class="pagination hidden">
+                    <button id="prevBtn" class="page-btn" onclick="showPrevPage()">← Previous</button>
+                    <span id="pageInfo" class="page-info">Test 1 of 1</span>
+                    <button id="nextBtn" class="page-btn" onclick="showNextPage()">Next →</button>
+                </div>
                 <div id="output" class="output">Click "Run All Tests" to execute the test suite...</div>
             </div>
         </div>
@@ -199,6 +272,7 @@
         <div class="footer">
             <p>Running Python in your browser using Pyodide (WebAssembly)</p>
             <p>All tests run client-side - no server required</p>
+            <p class="powered-by">Powered by Pyodide</p>
         </div>
     </div>
 

@@ -7,7 +7,7 @@ import numpy as np
 import time
 from grid_counting import (
     detect_available_accelerators,
-    FullGrid,
+    DenseGrid,
     SparseGrid
 )
 
@@ -61,9 +61,9 @@ def print_test_separator():
     print()
 
 
-def test_set_full_grid_basic():
-    """Test basic set_full_grid functionality (now sets to 2)"""
-    grid = FullGrid((3, 3))
+def test_set_dense_grid_basic():
+    """Test basic set_dense_grid functionality (now sets to 2)"""
+    grid = DenseGrid((3, 3))
     grid.set_locations([(0, 0), (1, 1), (2, 2)])
     result = grid.grid
     expected = np.zeros((3, 3), dtype=np.int32)
@@ -75,21 +75,21 @@ def test_set_full_grid_basic():
     if ascii:
         print()
         print("=" * 70)
-        print("TEST: set_full_grid (diagonal pattern)")
+        print("TEST: set_dense_grid (diagonal pattern)")
         print("=" * 70)
         ascii_lines = ascii.split('\n')
         print(ascii_lines[0])
         for line in ascii_lines[1:]:
             print(f"   {line}")
-    grid = FullGrid(result)
+    grid = DenseGrid(result)
     count = grid.count_positive_values()
     print(f"   Positive count: {count}")
     print("✓ Basic set_locations test passed")
 
 
-def test_set_full_grid_empty():
+def test_set_dense_grid_empty():
     """Test with empty locations list"""
-    grid = FullGrid((5, 5))
+    grid = DenseGrid((5, 5))
     grid.set_locations([])
     result = grid.grid
     expected = np.zeros((5, 5), dtype=np.int32)
@@ -99,23 +99,23 @@ def test_set_full_grid_empty():
     if ascii:
         print()
         print("=" * 70)
-        print("TEST: set_full_grid with empty locations (no locations specified)")
+        print("TEST: set_dense_grid with empty locations (no locations specified)")
         print("=" * 70)
         ascii_lines = ascii.split('\n')
         print(ascii_lines[0])
         for line in ascii_lines[1:]:
             print(f"   {line}")
     
-    grid = FullGrid(result)
+    grid = DenseGrid(result)
     count = grid.count_positive_values()
     print(f"   Positive count: {count}")
     print("✓ Empty locations test passed")
 
 
-def test_set_full_grid_out_of_bounds():
+def test_set_dense_grid_out_of_bounds():
     """Test with out-of-bounds locations (should be ignored)"""
     input_locations = [(0, 0), (10, 10), (-1, 0), (1, 1)]
-    grid = FullGrid((3, 3))
+    grid = DenseGrid((3, 3))
     grid.set_locations(input_locations)
     result = grid.grid
     expected = np.zeros((3, 3), dtype=np.int32)
@@ -131,7 +131,7 @@ def test_set_full_grid_out_of_bounds():
     if ascii:
         print()
         print("=" * 70)
-        print("TEST: set_full_grid with out-of-bounds locations (invalid locations ignored)")
+        print("TEST: set_dense_grid with out-of-bounds locations (invalid locations ignored)")
         print("=" * 70)
         print(f"Input locations: {input_locations}")
         print(f"Valid locations (set): {valid_locations}")
@@ -142,15 +142,15 @@ def test_set_full_grid_out_of_bounds():
         for line in ascii_lines[1:]:
             print(f"   {line}")
     
-    grid = FullGrid(result)
+    grid = DenseGrid(result)
     count = grid.count_positive_values()
     print(f"   Positive count: {count}")
     print("✓ Out-of-bounds locations test passed")
 
 
-def test_set_full_grid_single():
+def test_set_dense_grid_single():
     """Test with single location"""
-    grid = FullGrid((5, 5))
+    grid = DenseGrid((5, 5))
     grid.set_locations([(2, 3)])
     result = grid.grid
     assert result[2, 3] == 2
@@ -160,23 +160,23 @@ def test_set_full_grid_single():
     if ascii:
         print()
         print("=" * 70)
-        print("TEST: set_full_grid single location")
+        print("TEST: set_dense_grid single location")
         print("=" * 70)
         ascii_lines = ascii.split('\n')
         print(ascii_lines[0])
         for line in ascii_lines[1:]:
             print(f"   {line}")
     
-    grid = FullGrid(result)
+    grid = DenseGrid(result)
     count = grid.count_positive_values()
     print(f"   Positive count: {count}")
     print("✓ Single location test passed")
 
 
-def test_set_full_grid_multiple():
+def test_set_dense_grid_multiple():
     """Test with multiple locations"""
     locations = [(0, 0), (0, 4), (4, 0), (4, 4), (2, 2)]
-    grid = FullGrid((5, 5))
+    grid = DenseGrid((5, 5))
     grid.set_locations(locations)
     result = grid.grid
     assert np.sum(result) == len(locations) * 2  # Each location set to 2
@@ -186,23 +186,23 @@ def test_set_full_grid_multiple():
     if ascii:
         print()
         print("=" * 70)
-        print("TEST: set_full_grid multiple locations (corners + center)")
+        print("TEST: set_dense_grid multiple locations (corners + center)")
         print("=" * 70)
         ascii_lines = ascii.split('\n')
         print(ascii_lines[0])
         for line in ascii_lines[1:]:
             print(f"   {line}")
-    grid = FullGrid(result)
+    grid = DenseGrid(result)
     count = grid.count_positive_values()
     print(f"   Positive count: {count}")
     print("✓ Multiple locations test passed")
 
 
-def test_set_full_grid_modify_existing():
+def test_set_dense_grid_modify_existing():
     """Test modifying existing array"""
     existing = np.zeros((3, 3), dtype=np.int32)
     existing[0, 0] = 5  # Set an existing value
-    grid = FullGrid(existing)
+    grid = DenseGrid(existing)
     grid.set_locations([(1, 1)])
     result = grid.grid
     assert result[0, 0] == 5  # Original value preserved
@@ -212,21 +212,21 @@ def test_set_full_grid_modify_existing():
     if ascii:
         print()
         print("=" * 70)
-        print("TEST: Modify existing full_grid (preserves existing value)")
+        print("TEST: Modify existing dense_grid (preserves existing value)")
         print("=" * 70)
         ascii_lines = ascii.split('\n')
         print(ascii_lines[0])
         for line in ascii_lines[1:]:
             print(f"   {line}")
-    grid = FullGrid(result)
+    grid = DenseGrid(result)
     count = grid.count_positive_values()
     print(f"   Positive count: {count}")
     print("✓ Modify existing array test passed")
 
 
-def test_set_full_grid_from_sparse_locations():
-    """Test creating full grid from sparse locations"""
-    grid = FullGrid((4, 4))
+def test_set_dense_grid_from_sparse_locations():
+    """Test creating dense grid from sparse locations"""
+    grid = DenseGrid((4, 4))
     grid.set_locations([(0, 0), (3, 3)])
     result = grid.grid
     assert result.shape == (4, 4)
@@ -237,30 +237,30 @@ def test_set_full_grid_from_sparse_locations():
     if ascii:
         print()
         print("=" * 70)
-        print("TEST: set_full_grid from sparse locations (opposite corners)")
+        print("TEST: set_dense_grid from sparse locations (opposite corners)")
         print("=" * 70)
         ascii_lines = ascii.split('\n')
         print(ascii_lines[0])
         for line in ascii_lines[1:]:
             print(f"   {line}")
-    grid = FullGrid(result)
+    grid = DenseGrid(result)
     count = grid.count_positive_values()
     print(f"   Positive count: {count}")
     print("✓ Create sparse grid test passed")
 
 
 
-def test_count_full_grid_basic():
+def test_count_dense_grid_basic():
     """Test basic count_nonzero functionality (counts only positive values)"""
     array = np.array([[1, 0, 2], [0, 3, 0], [4, 0, 5]])
-    grid = FullGrid(array)
+    grid = DenseGrid(array)
     result = grid.count_positive_values()
     assert result == 5  # All are positive
     ascii = render_grid(array)
     if ascii:
         print()
         print("=" * 70)
-        print("TEST: count_full_grid (mixed positive values)")
+        print("TEST: count_dense_grid (mixed positive values)")
         print("=" * 70)
         ascii_lines = ascii.split('\n')
         print(ascii_lines[0])
@@ -270,17 +270,17 @@ def test_count_full_grid_basic():
     print("✓ Basic count_nonzero test passed")
 
 
-def test_count_full_grid_all_zeros():
+def test_count_dense_grid_all_zeros():
     """Test count_nonzero with all zeros"""
     array = np.zeros((3, 3))
-    grid = FullGrid(array)
+    grid = DenseGrid(array)
     result = grid.count_positive_values()
     assert result == 0  # No positive values
     ascii = render_grid(array)
     if ascii:
         print()
         print("=" * 70)
-        print("TEST: count_full_grid all zeros (no positive values)")
+        print("TEST: count_dense_grid all zeros (no positive values)")
         print("=" * 70)
         ascii_lines = ascii.split('\n')
         print(ascii_lines[0])
@@ -290,17 +290,17 @@ def test_count_full_grid_all_zeros():
     print("✓ Count non-zero all zeros test passed")
 
 
-def test_count_full_grid_all_nonzero():
+def test_count_dense_grid_all_nonzero():
     """Test count_nonzero with all positive values"""
     array = np.ones((3, 3))
-    grid = FullGrid(array)
+    grid = DenseGrid(array)
     result = grid.count_positive_values()
     assert result == 9  # All are positive
     ascii = render_grid(array)
     if ascii:
         print()
         print("=" * 70)
-        print("TEST: count_full_grid all positive (all values are 1)")
+        print("TEST: count_dense_grid all positive (all values are 1)")
         print("=" * 70)
         ascii_lines = ascii.split('\n')
         print(ascii_lines[0])
@@ -310,9 +310,9 @@ def test_count_full_grid_all_nonzero():
     print("✓ Count non-zero all positive test passed")
 
 
-def test_count_full_grid_with_set_full_grid():
-    """Test count_nonzero with set_full_grid (values set to 2 = positive)"""
-    grid = FullGrid((5, 5))
+def test_count_dense_grid_with_set_dense_grid():
+    """Test count_nonzero with set_dense_grid (values set to 2 = positive)"""
+    grid = DenseGrid((5, 5))
     grid.set_locations([(0, 0), (1, 1), (2, 2)])
     count = grid.count_positive_values()
     assert count == 3  # 2 is positive
@@ -320,7 +320,7 @@ def test_count_full_grid_with_set_full_grid():
     if ascii:
         print()
         print("=" * 70)
-        print("TEST: count_full_grid after set_full_grid (3 locations set to 2)")
+        print("TEST: count_dense_grid after set_dense_grid (3 locations set to 2)")
         print("=" * 70)
         ascii_lines = ascii.split('\n')
         print(ascii_lines[0])
@@ -330,10 +330,10 @@ def test_count_full_grid_with_set_full_grid():
     print("✓ Count non-zero with set_locations test passed")
 
 
-def test_count_full_grid_excludes_negatives():
+def test_count_dense_grid_excludes_negatives():
     """Test that negative values are excluded"""
     array = np.array([[1, -1, 0, 2], [0, -3, 1, 0], [-5, 0, 3, 0]])
-    grid = FullGrid(array)
+    grid = DenseGrid(array)
     result = grid.count_positive_values()
     assert result == 4  # Only positive: 1, 2, 1, 3 (negatives and zeros excluded)
     
@@ -349,7 +349,7 @@ def test_count_full_grid_excludes_negatives():
     ascii = render_grid(array, max_size=10, cell_renderer=render_cell)
     print()
     print("=" * 70)
-    print("TEST: count_full_grid excludes negatives (only positive counted)")
+    print("TEST: count_dense_grid excludes negatives (only positive counted)")
     print("=" * 70)
     ascii_lines = ascii.split('\n')
     print(ascii_lines[0])
@@ -360,10 +360,10 @@ def test_count_full_grid_excludes_negatives():
     print("✓ Count excludes negative values test passed")
 
 
-def test_set_full_grid_neighborhoods_overlapping():
+def test_set_dense_grid_neighborhoods_overlapping():
     """Test that overlapping neighborhoods are counted correctly (no double counting)"""
     # Create grid with two seeds that are close together (within L=2 of each other)
-    grid = FullGrid((8, 8))
+    grid = DenseGrid((8, 8))
     seeds = [(2, 2), (3, 3)]  # Seeds at (2,2) and (3,3) - Manhattan distance = 2
     grid.set_neighborhoods(seeds, max_distance=2, target_value=2)
     
@@ -396,7 +396,7 @@ def test_set_full_grid_neighborhoods_overlapping():
     ascii = render_grid(grid.grid, max_size=10, cell_renderer=render_cell)
     print()
     print("=" * 70)
-    print("TEST: set_full_grid_neighborhoods overlapping (L=2, close seeds)")
+    print("TEST: set_dense_grid_neighborhoods overlapping (L=2, close seeds)")
     print("=" * 70)
     ascii_lines = ascii.split('\n')
     print(ascii_lines[0])
@@ -413,10 +413,10 @@ def test_set_full_grid_neighborhoods_overlapping():
     print("✓ Overlapping Manhattan neighborhoods test passed")
 
 
-def test_set_full_grid_neighborhoods_non_overlapping():
+def test_set_dense_grid_neighborhoods_non_overlapping():
     """Test two seeds with Manhattan distance > L (non-overlapping neighborhoods)"""
     # Create grid with two seeds that are far apart (distance > L)
-    grid = FullGrid((10, 10))
+    grid = DenseGrid((10, 10))
     seeds = [(2, 2), (7, 7)]  # Seeds at (2,2) and (7,7) - Manhattan distance = 10
     grid.set_neighborhoods(seeds, max_distance=2, target_value=2)
     
@@ -443,7 +443,7 @@ def test_set_full_grid_neighborhoods_non_overlapping():
     ascii = render_grid(grid.grid, max_size=10, cell_renderer=render_cell)
     print()
     print("=" * 70)
-    print("TEST: set_full_grid_neighborhoods non-overlapping (L=2, far seeds)")
+    print("TEST: set_dense_grid_neighborhoods non-overlapping (L=2, far seeds)")
     print("=" * 70)
     ascii_lines = ascii.split('\n')
     print(ascii_lines[0])
@@ -504,7 +504,7 @@ def test_counting_performance_small():
     array = np.random.randint(0, 10, size=(100, 100))
     
     start = time.perf_counter()
-    grid = FullGrid(array)
+    grid = DenseGrid(array)
     result = grid.count_positive_values()
     elapsed = time.perf_counter() - start
     
@@ -518,7 +518,7 @@ def test_counting_performance_small():
 def test_manhattan_performance_comparison():
     """Test that direct counting is faster than grid creation"""
     print("=" * 70)
-    print("TEST: count_sparse_grid vs set_full_grid + count_full_grid performance")
+    print("TEST: count_sparse_grid vs set_dense_grid + count_dense_grid performance")
     print("=" * 70)
     print("Testing Manhattan neighborhood performance...")
     
@@ -538,7 +538,7 @@ def test_manhattan_performance_comparison():
     # Grid creation + count
     times_grid = []
     for _ in range(3):
-        grid = FullGrid((100, 100))
+        grid = DenseGrid((100, 100))
         start = time.perf_counter()
         grid.set_neighborhoods(seeds, max_distance=L, target_value=2)
         count_grid = grid.count()
@@ -800,20 +800,20 @@ def run_all_tests():
     print("-" * 50)
     
     try:
-        test_set_full_grid_basic()
-        test_set_full_grid_empty()
-        test_set_full_grid_out_of_bounds()
-        test_set_full_grid_single()
-        test_set_full_grid_multiple()
-        test_set_full_grid_modify_existing()
-        test_set_full_grid_from_sparse_locations()
-        test_count_full_grid_basic()
-        test_count_full_grid_all_zeros()
-        test_count_full_grid_all_nonzero()
-        test_count_full_grid_with_set_full_grid()
-        test_count_full_grid_excludes_negatives()
-        test_set_full_grid_neighborhoods_overlapping()
-        test_set_full_grid_neighborhoods_non_overlapping()
+        test_set_dense_grid_basic()
+        test_set_dense_grid_empty()
+        test_set_dense_grid_out_of_bounds()
+        test_set_dense_grid_single()
+        test_set_dense_grid_multiple()
+        test_set_dense_grid_modify_existing()
+        test_set_dense_grid_from_sparse_locations()
+        test_count_dense_grid_basic()
+        test_count_dense_grid_all_zeros()
+        test_count_dense_grid_all_nonzero()
+        test_count_dense_grid_with_set_dense_grid()
+        test_count_dense_grid_excludes_negatives()
+        test_set_dense_grid_neighborhoods_overlapping()
+        test_set_dense_grid_neighborhoods_non_overlapping()
         test_sparse_grid_class()
         
         # Project requirement examples

@@ -22,12 +22,12 @@ import numpy as np
 _accelerator_message_printed = False
 
 
-class FullGrid:
-    """A full 2D grid represented as a numpy array."""
+class DenseGrid:
+    """A dense 2D grid represented as a numpy array."""
     
     def __init__(self, shape_or_array, initial_value=0):
         """
-        Create a FullGrid from a shape or existing array.
+        Create a DenseGrid from a shape or existing array.
         
         Args:
             shape_or_array: Either a tuple (rows, cols) or existing numpy array
@@ -194,7 +194,7 @@ class FullGrid:
         return self.grid.shape
     
     def __repr__(self):
-        return f"FullGrid(shape={self.shape})"
+        return f"DenseGrid(shape={self.shape})"
 
 
 class SparseGrid:
