@@ -574,6 +574,10 @@ def test_sparse_grid_class():
 
 def test_hardware_detection():
     """Test that hardware detection works and at least NumPy is available"""
+    print()
+    print("=" * 70)
+    print("TEST: Hardware detection")
+    print("=" * 70)
     print("Testing hardware detection...")
     accelerators = detect_available_accelerators()
     
@@ -589,6 +593,10 @@ def test_hardware_detection():
 
 def test_counting_performance_small():
     """Test counting performance on small array"""
+    print()
+    print("=" * 70)
+    print("TEST: Counting performance (small array)")
+    print("=" * 70)
     print("Testing counting performance (small array)...")
     array = np.random.randint(0, 10, size=(100, 100))
     
@@ -918,6 +926,8 @@ def run_all_tests():
         test_set_neighborhoods_preserves_already_set_cells()
         test_set_to_zero_overwrites_all_cells()
         test_sparse_grid_class()
+        test_hardware_detection()
+        test_counting_performance_small()
         
         # Project requirement examples
         test_example_1_n3_centered()

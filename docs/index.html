@@ -277,8 +277,41 @@
         </div>
     </div>
 
-    <!-- Load Pyodide -->
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <!-- Polyfill exports for Pyodide - must be before Pyodide script -->
+    <script>
+        // Define exports in global scope to prevent ReferenceError
+        // Wrap in try-catch to prevent debugger pauses
+        try {
+            if (typeof exports === 'undefined') {
+                var exports = {};
+            }
+            // Also make sure window.exports exists
+            if (typeof window !== 'undefined') {
+                window.exports = exports;
+            }
+        } catch (e) {
+            console.warn('Error setting up exports polyfill:', e);
+        }
+    </script>
+    <!-- Load Pyodide with error suppression -->
+    <script>
+        // Suppress Pyodide's exports error by patching Object.assign before Pyodide loads
+        const originalAssign = Object.assign;
+        Object.assign = function(...args) {
+            try {
+                return originalAssign.apply(this, args);
+            } catch (e) {
+                // Suppress exports assignment errors
+                if (args.length > 0 && typeof args[0] === 'object' && args[0].exports === undefined) {
+                    args[0].exports = {};
+                    return originalAssign.apply(this, args);
+                }
+                throw e;
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"
+            onerror="console.error('Failed to load Pyodide');"></script>
     <script type="module" src="test_runner.js"></script>
 </body>
 </html>

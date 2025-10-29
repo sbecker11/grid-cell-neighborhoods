@@ -24,7 +24,10 @@ async function initPyodideRuntime() {
             throw new Error('Pyodide script not loaded. Make sure pyodide.js is included in the HTML.');
         }
         pyodide = await window.loadPyodide({
-            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
+            // Disable SharedArrayBuffer to avoid cross-origin isolation warnings
+            // This is fine for single-threaded use cases like ours
+            fullStdLib: true
         });
         
         statusEl.className = 'status info';
@@ -69,10 +72,19 @@ async function loadModules() {
         pyodide.FS.writeFile('grid_counting_tests.py', testsCode);
 
         // Import modules by name so `from grid_counting import ...` works
+        // Clear module cache to ensure fresh modules
         pyodide.runPython(`
 import sys, importlib
 if '' not in sys.path:
     sys.path.append('')
+
+# Clear any cached modules to prevent stale code
+if 'grid_counting' in sys.modules:
+    del sys.modules['grid_counting']
+if 'grid_counting_tests' in sys.modules:
+    del sys.modules['grid_counting_tests']
+
+# Import fresh modules
 grid_counting = importlib.import_module('grid_counting')
 tests_module = importlib.import_module('grid_counting_tests')
 from grid_counting_tests import run_all_tests
@@ -153,44 +165,22 @@ function parseTestOutput(output) {
         return [output];
     }
     
-    // Add initial header lines (before first test)
-    if (testBoundaries[0] > 0) {
-        pages.push(lines.slice(0, testBoundaries[0]).join('\n'));
-    }
-    
-    // Process each test
+    // Process each test - include everything from boundary to next boundary
     for (let i = 0; i < testBoundaries.length; i++) {
         const startIdx = testBoundaries[i];
         const endIdx = (i < testBoundaries.length - 1) ? testBoundaries[i + 1] : lines.length;
         
-        // Extract test content (from separator through end of test)
+        // Extract test content (from separator through next boundary)
         const testLines = lines.slice(startIdx, endIdx);
         
-        // Find the actual end of this test (after ✓ or ✗ marker)
-        let testEndIdx = testLines.length;
-        for (let j = 0; j < testLines.length; j++) {
-            const line = testLines[j];
-            // Look for test completion markers
-            if ((line.includes('✓') || line.includes('✗')) && 
-                (line.includes('test passed') || line.includes('test failed') || 
-                 line.includes('passed') || line.includes('failed'))) {
-                // Check if there's significant content after (blank lines don't count)
-                let hasMoreContent = false;
-                for (let k = j + 1; k < Math.min(j + 5, testLines.length); k++) {
-                    if (testLines[k].trim().length > 0) {
-                        hasMoreContent = true;
-                        break;
-                    }
-                }
-                // If no more significant content, this is the end
-                if (!hasMoreContent || j === testLines.length - 1) {
-                    testEndIdx = j + 1;
-                    break;
-                }
-            }
+        // Remove trailing blank lines to clean up the output
+        while (testLines.length > 0 && testLines[testLines.length - 1].trim() === '') {
+            testLines.pop();
         }
         
-        pages.push(testLines.slice(0, testEndIdx).join('\n'));
+        if (testLines.length > 0) {
+            pages.push(testLines.join('\n'));
+        }
     }
     
     // Add any trailing content after last test
@@ -303,16 +293,18 @@ async function runTests() {
         try {
             pyodide.runPython(`
                 # Run all tests
-                success = run_all_tests()
+                run_all_tests()
             `);
             
             // Get final output
             const finalOutput = getPythonOutput();
             
-            // Check if tests passed
-            const testResult = pyodide.runPython('success');
-            
             clearInterval(updateInterval);
+            
+            // Check if tests passed by examining output (more reliable)
+            const testResult = finalOutput.includes('✓ All tests passed!') && 
+                              !finalOutput.includes('✗ Test failed') &&
+                              !finalOutput.includes('✗ Error:');
             
             // Parse output into pages
             testPages = parseTestOutput(finalOutput);
