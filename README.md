@@ -27,6 +27,72 @@ Run all unit tests interactively in your browser using Pyodide (Python compiled 
 - **Direct counting optimization**: Count positive-valued cells in neighborhoods without grid allocation (3-6x faster)
 - **Zero external dependencies (minimum)**: Works with just NumPy
 
+## Dense vs Sparse Grids
+
+This library provides two approaches for working with 2D grids:
+
+### **Dense Arrays (`DenseGrid`)**
+A **dense grid** is a fully allocated 2D NumPy array where every cell exists in memory, even if most cells are zero or empty.
+
+**Characteristics:**
+- ✅ Stores complete grid in memory (all rows × columns cells)
+- ✅ Fast random access to any cell
+- ✅ Supports visualization and full grid operations
+- ❌ Uses O(rows × cols) memory regardless of how many cells are active
+- ❌ Memory-intensive for large, mostly-empty grids
+
+**Use when:**
+- You need to visualize or modify the full grid
+- You'll access cells randomly throughout the grid
+- The grid is relatively small or mostly filled
+- You need the actual grid values for further processing
+
+**Example:**
+```python
+from grid_counting import DenseGrid
+
+# Allocates full 100×100 = 10,000 cells in memory
+grid = DenseGrid((100, 100))
+grid.set_locations([(10, 10), (20, 20)], value=2)
+count = grid.count_positive_values()  # Counts from full grid array
+```
+
+### **Sparse Arrays (`SparseGrid`)**
+A **sparse grid** stores only the locations and values of active cells without allocating the full grid.
+
+**Characteristics:**
+- ✅ Memory efficient: Only stores active cell locations
+- ✅ 3-6x faster for counting operations (no grid allocation)
+- ✅ Optimal for large grids with few active cells
+- ❌ Cannot access arbitrary cells directly (no full grid)
+- ❌ Cannot visualize full grid (only has location data)
+
+**Use when:**
+- You only need counts, not the full grid
+- Grid is large but most cells are inactive/zero
+- Memory is constrained
+- Performance is critical for counting operations
+
+**Example:**
+```python
+from grid_counting import SparseGrid
+
+# No grid allocation - only stores locations [(10,10), (20,20)]
+sparse = SparseGrid(100, 100, locations=[(10, 10), (20, 20)], L=3)
+count = sparse.count_positive_values()  # Counts without creating grid (faster!)
+```
+
+### **Quick Decision Guide**
+
+| Need | Use |
+|------|-----|
+| Full grid for visualization | `DenseGrid` |
+| Full grid for further processing | `DenseGrid` |
+| Random cell access | `DenseGrid` |
+| Just counting cells | `SparseGrid` |
+| Large mostly-empty grids | `SparseGrid` |
+| Maximum performance for counting | `SparseGrid` |
+
 ## Installation
 
 ### Setup Virtual Environment (Recommended)
