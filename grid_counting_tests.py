@@ -81,7 +81,8 @@ def test_set_dense_grid_basic():
         print(ascii_lines[0])
         for line in ascii_lines[1:]:
             print(f"   {line}")
-    grid = DenseGrid(result)
+    grid = DenseGrid(result.shape[0], result.shape[1])
+    grid.grid = result
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Basic set_locations test passed")
@@ -106,7 +107,8 @@ def test_set_dense_grid_empty():
         for line in ascii_lines[1:]:
             print(f"   {line}")
     
-    grid = DenseGrid(result)
+    grid = DenseGrid(result.shape[0], result.shape[1])
+    grid.grid = result
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Empty locations test passed")
@@ -142,7 +144,8 @@ def test_set_dense_grid_out_of_bounds():
         for line in ascii_lines[1:]:
             print(f"   {line}")
     
-    grid = DenseGrid(result)
+    grid = DenseGrid(result.shape[0], result.shape[1])
+    grid.grid = result
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Out-of-bounds locations test passed")
@@ -167,7 +170,8 @@ def test_set_dense_grid_single():
         for line in ascii_lines[1:]:
             print(f"   {line}")
     
-    grid = DenseGrid(result)
+    grid = DenseGrid(result.shape[0], result.shape[1])
+    grid.grid = result
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Single location test passed")
@@ -192,7 +196,8 @@ def test_set_dense_grid_multiple():
         print(ascii_lines[0])
         for line in ascii_lines[1:]:
             print(f"   {line}")
-    grid = DenseGrid(result)
+    grid = DenseGrid(result.shape[0], result.shape[1])
+    grid.grid = result
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Multiple locations test passed")
@@ -202,7 +207,8 @@ def test_set_dense_grid_modify_existing():
     """Test modifying existing array"""
     existing = np.zeros((3, 3), dtype=np.int32)
     existing[0, 0] = 5  # Set an existing value
-    grid = DenseGrid(existing)
+    grid = DenseGrid(existing.shape[0], existing.shape[1])
+    grid.grid = existing
     grid.set_locations_to_value([(1, 1)])
     result = grid.grid
     assert result[0, 0] == 5  # Original value preserved
@@ -218,7 +224,8 @@ def test_set_dense_grid_modify_existing():
         print(ascii_lines[0])
         for line in ascii_lines[1:]:
             print(f"   {line}")
-    grid = DenseGrid(result)
+    grid = DenseGrid(result.shape[0], result.shape[1])
+    grid.grid = result
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Modify existing array test passed")
@@ -243,7 +250,8 @@ def test_set_dense_grid_from_sparse_locations():
         print(ascii_lines[0])
         for line in ascii_lines[1:]:
             print(f"   {line}")
-    grid = DenseGrid(result)
+    grid = DenseGrid(result.shape[0], result.shape[1])
+    grid.grid = result
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Create sparse grid test passed")
