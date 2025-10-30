@@ -253,7 +253,8 @@ def test_set_dense_grid_from_sparse_locations():
 def test_count_dense_grid_basic():
     """Test basic count_nonzero functionality (counts only positive values)"""
     array = np.array([[1, 0, 2], [0, 3, 0], [4, 0, 5]])
-    grid = DenseGrid(array)
+    grid = DenseGrid(array.shape[0], array.shape[1])
+    grid.grid = array
     result = grid.count_positive_valued_cells()
     assert result == 5  # All are positive
     ascii = render_grid(array)
@@ -273,7 +274,8 @@ def test_count_dense_grid_basic():
 def test_count_dense_grid_all_zeros():
     """Test count_nonzero with all zeros"""
     array = np.zeros((3, 3))
-    grid = DenseGrid(array)
+    grid = DenseGrid(array.shape[0], array.shape[1])
+    grid.grid = array
     result = grid.count_positive_valued_cells()
     assert result == 0  # No positive values
     ascii = render_grid(array)
@@ -293,7 +295,8 @@ def test_count_dense_grid_all_zeros():
 def test_count_dense_grid_all_nonzero():
     """Test count_nonzero with all positive values"""
     array = np.ones((3, 3))
-    grid = DenseGrid(array)
+    grid = DenseGrid(array.shape[0], array.shape[1])
+    grid.grid = array
     result = grid.count_positive_valued_cells()
     assert result == 9  # All are positive
     ascii = render_grid(array)
@@ -333,7 +336,8 @@ def test_count_dense_grid_with_set_dense_grid():
 def test_count_dense_grid_excludes_negatives():
     """Test that negative values are excluded"""
     array = np.array([[1, -1, 0, 2], [0, -3, 1, 0], [-5, 0, 3, 0]])
-    grid = DenseGrid(array)
+    grid = DenseGrid(array.shape[0], array.shape[1])
+    grid.grid = array
     result = grid.count_positive_valued_cells()
     assert result == 4  # Only positive: 1, 2, 1, 3 (negatives and zeros excluded)
     

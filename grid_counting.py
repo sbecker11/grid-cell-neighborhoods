@@ -25,29 +25,22 @@ _accelerator_message_printed = False
 class DenseGrid:
     """A dense 2D grid represented as a numpy array."""
     
-    def __init__(self, height, width=None, initial_value=0):
+    def __init__(self, height, width, initial_value=0):
         """
-        Create a DenseGrid from dimensions or existing array.
+        Create a DenseGrid from explicit integer dimensions.
         
         Args:
-            height: Number of rows, or existing numpy array, or tuple (height, width)
-            width: Number of columns (required if height is an integer)
-            initial_value: Value to fill if creating new grid (default=0)
+            height: Number of rows (positive int)
+            width: Number of columns (positive int)
+            initial_value: Value to fill the grid with (default=0)
         """
-        # Support legacy tuple format: DenseGrid((height, width))
-        if width is None and isinstance(height, tuple):
-            height, width = height
-        
-        # Support existing array: DenseGrid(array)
-        if width is None:
-            self.grid = np.asarray(height).copy()
-            if self.grid.size == 0 or len(self.grid.shape) != 2 or self.grid.shape[0] <= 0 or self.grid.shape[1] <= 0:
-                raise ValueError(f"Grid must be 2D with dimensions > 0, got shape {self.grid.shape}")
-        else:
-            # New grid from dimensions: DenseGrid(height, width)
-            if height <= 0 or width <= 0:
-                raise ValueError(f"Grid dimensions must be > 0, got {height}x{width}")
-            self.grid = np.full((height, width), initial_value, dtype=np.int32)
+        if height is None or width is None:
+            raise ValueError("height and width must be provided and non-None")
+        if not isinstance(height, int) or not isinstance(width, int):
+            raise TypeError("height and width must be integers")
+        if height <= 0 or width <= 0:
+            raise ValueError(f"Grid dimensions must be > 0, got {height}x{width}")
+        self.grid = np.full((height, width), initial_value, dtype=np.int32)
     
     def set_locations_to_value(self, locations, value=2):
         """Set specified locations to a value.
@@ -57,6 +50,9 @@ class DenseGrid:
                 entries are ignored. Duplicates are allowed and have no extra effect.
             value: Integer value to assign. If 0, overwrite regardless of current value;
                 otherwise only set cells that are currently 0 (unset).
+
+        Returns:
+            DenseGrid: self, to allow method chaining.
         """
         import numpy as np
         
@@ -110,6 +106,9 @@ class DenseGrid:
             L: Maximum Manhattan distance (non-negative integer).
             value: Integer value to assign to all cells within distance L. If 0, overwrite
                 regardless of current value; otherwise only set cells that are currently 0.
+
+        Returns:
+            DenseGrid: self, to allow method chaining.
         """
         from collections import deque
         
@@ -161,7 +160,11 @@ class DenseGrid:
         return self
     
     def count_positive_valued_cells(self):
-        """Count positive-valued cells in the grid using hardware acceleration."""
+        """Count positive-valued cells in the grid using hardware acceleration.
+
+        Returns:
+            int: Number of cells with value > 0.
+        """
         import numpy as np
         
         # Convert to numpy array
@@ -262,6 +265,9 @@ class SparseGrid:
             locations: Iterable of zero-based (row, col) integer tuples. Out-of-bounds
                 entries are ignored when counting. Duplicates are allowed.
             value: Integer value associated to each location (stored uniformly).
+
+        Returns:
+            SparseGrid: self, to allow method chaining.
         """
         self.locations = locations
         self.values = [value] * len(locations) if locations else []
@@ -274,6 +280,9 @@ class SparseGrid:
             locations: Iterable of zero-based (row, col) integer tuples serving as seeds.
             L: Maximum Manhattan distance (non-negative integer).
             value: Integer value associated to the neighborhoods (stored uniformly).
+
+        Returns:
+            SparseGrid: self, to allow method chaining.
         """
         self.locations = locations
         self.L = L
@@ -281,7 +290,11 @@ class SparseGrid:
         return self
     
     def count_positive_valued_cells(self):
-        """Count positive-valued cells in the sparse grid without creating grid."""
+        """Count positive-valued cells in the sparse grid without creating grid.
+
+        Returns:
+            int: Number of unique cells within L of any seed, clamped to bounds.
+        """
         positive_cells = set()
         
         # For each seed, enumerate all cells within Manhattan distance L
