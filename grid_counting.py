@@ -344,9 +344,8 @@ def detect_available_accelerators():
                 accelerators['jax_gpu'] = True
             elif device.device_kind == 'tpu':
                 accelerators['jax_tpu'] = True
-                
-        from jax import device_count as jax_device_count
-        print(f"JAX is available with {jax_device_count()} device(s)")
+        
+        # Do not print device info; return flags silently
     except ImportError:
         pass  # JAX not installed
     
@@ -355,11 +354,9 @@ def detect_available_accelerators():
         import torch
         if torch.cuda.is_available():
             accelerators['pytorch_cuda'] = True
-            print(f"PyTorch CUDA: {torch.cuda.device_count()} GPU(s) available")
         
         if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
             accelerators['pytorch_mps'] = True
-            print("PyTorch MPS (Apple Silicon) available")
     except ImportError:
         pass  # PyTorch not installed
     
