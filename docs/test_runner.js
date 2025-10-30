@@ -72,11 +72,11 @@ async function loadModules() {
     try {
         // Fetch sources
         outputEl.textContent += 'Loading grid_counting.py...\n';
-        const gridCountingResponse = await fetch('grid_counting.py?v=2');
+        const gridCountingResponse = await fetch('grid_counting.py?v=3');
         const gridCountingCode = await gridCountingResponse.text();
 
         outputEl.textContent += 'Loading grid_counting_tests.py...\n';
-        const testsResponse = await fetch('grid_counting_tests.py?v=3');
+        const testsResponse = await fetch('grid_counting_tests.py?v=13');
         const testsCode = await testsResponse.text();
 
         // Write to Pyodide filesystem so Python import system can find them
@@ -160,7 +160,11 @@ function parseTestOutput(output) {
     const testStartLines = [];
     let lastStart = -1000;
     for (let i = 0; i < lines.length; i++) {
-        if (lines[i].trim().startsWith('TEST:')) {
+        // Match both "TEST N:" (numbered) and "TEST:" (wrapper) patterns
+        const trimmed = lines[i].trim();
+        const numberedMatch = trimmed.match(/^TEST\s+(\d+):\s+(.+)$/);
+        const unnumberedMatch = trimmed.startsWith('TEST:');
+        if (numberedMatch || unnumberedMatch) {
             // Skip TEST headers that appear too close to the previous one
             // (these are usually duplicate wrapper/internal headers)
             if (i - lastStart > 6) {
@@ -174,12 +178,21 @@ function parseTestOutput(output) {
     }
     const pages = [];
     for (let i = 0; i < testStartLines.length; i++) {
-        const start = testStartLines[i];
+        let start = testStartLines[i];
+        // If the line before the TEST: line is a ==== line, include it
+        if (start > 0 && lines[start - 1].trim() === '='.repeat(70)) {
+            start = start - 1;
+        }
         const end = (i < testStartLines.length - 1) ? testStartLines[i + 1] : lines.length;
         const testLines = lines.slice(start, end);
-        // Trim trailing blank lines
-        while (testLines.length > 0 && testLines[testLines.length - 1].trim() === '') {
-            testLines.pop();
+        // Trim trailing blank lines and trailing ==== lines
+        while (testLines.length > 0) {
+            const lastLine = testLines[testLines.length - 1].trim();
+            if (lastLine === '' || lastLine === '='.repeat(70)) {
+                testLines.pop();
+            } else {
+                break;
+            }
         }
         if (testLines.length > 0) {
             pages.push(testLines.join('\n'));
