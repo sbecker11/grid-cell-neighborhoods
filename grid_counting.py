@@ -50,7 +50,14 @@ class DenseGrid:
             self.grid = np.full((height, width), initial_value, dtype=np.int32)
     
     def set_locations_to_value(self, locations, value=2):
-        """Set specified locations to a value."""
+        """Set specified locations to a value.
+
+        Args:
+            locations: Iterable of zero-based (row, col) integer tuples. Out-of-bounds
+                entries are ignored. Duplicates are allowed and have no extra effect.
+            value: Integer value to assign. If 0, overwrite regardless of current value;
+                otherwise only set cells that are currently 0 (unset).
+        """
         import numpy as np
         
         if not locations:
@@ -95,7 +102,15 @@ class DenseGrid:
         return self
     
     def set_neighborhoods_to_value(self, locations, L=3, value=2):
-        """Set neighborhoods around seeds using BFS."""
+        """Set neighborhoods around locations using BFS.
+
+        Args:
+            locations: Iterable of zero-based (row, col) integer tuples serving as seeds.
+                Out-of-bounds entries are ignored. Duplicates are allowed.
+            L: Maximum Manhattan distance (non-negative integer).
+            value: Integer value to assign to all cells within distance L. If 0, overwrite
+                regardless of current value; otherwise only set cells that are currently 0.
+        """
         from collections import deque
         
         result = np.array(self.grid, copy=True)
@@ -241,13 +256,25 @@ class SparseGrid:
         self.L = 0
     
     def set_locations_to_value(self, locations, value=2):
-        """Set locations and their values in the sparse grid."""
+        """Set locations and their values in the sparse grid.
+
+        Args:
+            locations: Iterable of zero-based (row, col) integer tuples. Out-of-bounds
+                entries are ignored when counting. Duplicates are allowed.
+            value: Integer value associated to each location (stored uniformly).
+        """
         self.locations = locations
         self.values = [value] * len(locations) if locations else []
         return self
     
     def set_neighborhoods_to_value(self, locations, L, value=2):
-        """Set neighborhoods around locations and update L value."""
+        """Set neighborhoods around locations and update L value.
+
+        Args:
+            locations: Iterable of zero-based (row, col) integer tuples serving as seeds.
+            L: Maximum Manhattan distance (non-negative integer).
+            value: Integer value associated to the neighborhoods (stored uniformly).
+        """
         self.locations = locations
         self.L = L
         self.values = [value] * len(locations) if locations else []

@@ -186,6 +186,12 @@ A sparse grid that stores only seed locations and Manhattan distance, avoiding f
 - `set_neighborhoods_to_value(locations, L, value=2)`: Set neighborhoods around locations using BFS (applies same value to all unset cells)
 - `count_positive_valued_cells()`: Count positive-valued cells without creating grid
 
+#### Definition: locations
+- A list or iterable of zero-based `(row, col)` integer tuples, e.g. `[(r, c), ...]`.
+- Rows in `[0, height-1]`, columns in `[0, width-1]`; out-of-bounds entries are ignored.
+- Duplicates are allowed and have no additional effect.
+- Single location may be provided as a 2-tuple `(row, col)`; it is treated as one item.
+
 **Benefits:**
 - Fastest approach (3-6x faster than creating grid)
 - Memory efficient (no grid allocation)
