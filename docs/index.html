@@ -254,10 +254,8 @@
         
         <div class="content">
             <div class="controls">
-                <button id="runTests" class="btn" onclick="runTests()">Run All Tests</button>
+                <button id="runTests" class="btn" onclick="runTests()" disabled>Run All Tests</button>
             </div>
-            
-            <div id="status" class="status hidden"></div>
             
             <div class="test-summary">
                 <h3>Test Execution Output</h3>
@@ -312,6 +310,6 @@
     </script>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"
             onerror="console.error('Failed to load Pyodide');"></script>
-    <script type="module" src="test_runner.js"></script>
+    <script type="module" src="test_runner.js?v=7"></script>
 </body>
 </html>

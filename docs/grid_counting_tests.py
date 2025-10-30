@@ -462,11 +462,12 @@ def test_set_dense_grid_neighborhoods_non_overlapping():
 
 def test_sparse_grid_class():
     """Test SparseGrid class functionality"""
-    # Create a SparseGrid
-    sparse = SparseGrid(100, 100, [(10, 10), (20, 20)], L=3)
+    # Create a SparseGrid and set neighborhoods
+    sparse = SparseGrid(100, 100)
+    seeds = [(10, 10), (20, 20)]
+    sparse.set_neighborhoods_to_value(seeds, L=3, value=2)
     assert sparse.num_rows == 100
     assert sparse.num_cols == 100
-    assert len(sparse.locations) == 2
     
     # Count should work with L=3
     count = sparse.count_positive_valued_cells()
@@ -477,8 +478,8 @@ def test_sparse_grid_class():
     print("TEST: SparseGrid.class")
     print("=" * 70)
     print(f"   Grid dimensions: {sparse.num_rows}x{sparse.num_cols}")
-    print(f"   Seed locations: {sparse.locations}")
-    print(f"   L: {sparse.L}")
+    print(f"   Seed locations: {seeds}")
+    print(f"   L: {3}")
     print(f"   Count: {count}")
     print("✓ SparseGrid class test passed")
 
@@ -537,8 +538,9 @@ def test_manhattan_performance_comparison():
     times_direct = []
     for _ in range(3):
         start = time.perf_counter()
-        sparse = SparseGrid(100, 100, seeds, L=L)
-        count_direct = sparse.count()
+        sparse = SparseGrid(100, 100)
+        sparse.set_neighborhoods_to_value(seeds, L=L, value=2)
+        count_direct = sparse.count_positive_valued_cells()
         times_direct.append(time.perf_counter() - start)
     
     avg_direct = np.mean(times_direct)
@@ -549,7 +551,7 @@ def test_manhattan_performance_comparison():
         grid = DenseGrid(100, 100)
         start = time.perf_counter()
         grid.set_neighborhoods_to_value(seeds, L=L, value=2)
-        count_grid = grid.count()
+        count_grid = grid.count_positive_valued_cells()
         times_grid.append(time.perf_counter() - start)
     
     avg_grid = np.mean(times_grid)
@@ -567,7 +569,8 @@ def test_manhattan_performance_comparison():
 def test_example_1_n3_centered():
     """Example 1: One positive cell fully contained; N=3"""
     # According to Counting_grid-cell_neighborhoods.txt: 25 cells in N=3 neighborhood
-    sparse = SparseGrid(11, 11, [(5, 5)], L=3)
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(5, 5)], L=3, value=2)
     count = sparse.count_positive_valued_cells()
     
     # Formula for cells in Manhattan diamond: cells = (2*N+1)^2 - N*(N+1) for N=3
@@ -587,7 +590,8 @@ def test_example_1_n3_centered():
 def test_example_2_n3_near_edge():
     """Example 2: One positive cell near an edge; N=3"""
     # According to Counting_grid-cell_neighborhoods.txt: 21 cells (25 - 4 that fell off edge)
-    sparse = SparseGrid(11, 11, [(5, 2)], L=3)
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(5, 2)], L=3, value=2)
     count = sparse.count_positive_valued_cells()
     
     # Near left edge at column 2, some cells fall off
@@ -605,7 +609,8 @@ def test_example_2_n3_near_edge():
 def test_example_3_n2_disjoint():
     """Example 3: Two positive values with disjoint neighborhoods; N=2"""
     # According to Counting_grid-cell_neighborhoods.txt: 26 cells total (13 per neighborhood)
-    sparse = SparseGrid(11, 11, [(2, 2), (8, 8)], L=2)
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(2, 2), (8, 8)], L=2, value=2)
     count = sparse.count_positive_valued_cells()
     
     # Two disjoint neighborhoods: 13 cells each = 26 total
@@ -624,7 +629,8 @@ def test_example_4_n2_overlapping():
     """Example 4: Two positive values with overlapping neighborhoods; N=2"""
     # According to Counting_grid-cell_neighborhoods.txt: 22 cells (overlapping)
     # Place seeds close enough that neighborhoods overlap
-    sparse = SparseGrid(11, 11, [(5, 5), (6, 6)], L=2)
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(5, 5), (6, 6)], L=2, value=2)
     count = sparse.count_positive_valued_cells()
     
     # Should be less than 26 (disjoint case) due to overlap
@@ -642,7 +648,8 @@ def test_example_4_n2_overlapping():
 
 def test_edge_case_corner():
     """Edge case: Positive value in a corner"""
-    sparse = SparseGrid(11, 11, [(0, 0)], L=2)
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(0, 0)], L=2, value=2)
     count = sparse.count_positive_valued_cells()
     
     # Should be fewer than centered case due to corner
@@ -660,7 +667,8 @@ def test_edge_case_corner():
 
 def test_edge_case_odd_shaped_1x21():
     """Edge case: Odd shaped array 1x21"""
-    sparse = SparseGrid(1, 21, [(0, 10)], L=3)
+    sparse = SparseGrid(1, 21)
+    sparse.set_neighborhoods_to_value([(0, 10)], L=3, value=2)
     count = sparse.count_positive_valued_cells()
     
     # Single row, neighborhood spreads horizontally
@@ -679,7 +687,8 @@ def test_edge_case_odd_shaped_1x21():
 
 def test_edge_case_odd_shaped_1x1():
     """Edge case: Smallest array 1x1"""
-    sparse = SparseGrid(1, 1, [(0, 0)], L=10)
+    sparse = SparseGrid(1, 1)
+    sparse.set_neighborhoods_to_value([(0, 0)], L=10, value=2)
     count = sparse.count_positive_valued_cells()
     
     # Only one cell total, so count should be 1
@@ -696,7 +705,8 @@ def test_edge_case_odd_shaped_1x1():
 
 def test_edge_case_odd_shaped_10x1():
     """Edge case: Long vertical array 10x1"""
-    sparse = SparseGrid(10, 1, [(5, 0)], L=3)
+    sparse = SparseGrid(10, 1)
+    sparse.set_neighborhoods_to_value([(5, 0)], L=3, value=2)
     count = sparse.count_positive_valued_cells()
     
     # Single column, neighborhood spreads vertically
@@ -715,7 +725,8 @@ def test_edge_case_odd_shaped_10x1():
 
 def test_edge_case_odd_shaped_2x2():
     """Edge case: Small square 2x2"""
-    sparse = SparseGrid(2, 2, [(0, 0)], L=2)
+    sparse = SparseGrid(2, 2)
+    sparse.set_neighborhoods_to_value([(0, 0)], L=2, value=2)
     count = sparse.count_positive_valued_cells()
     
     # With L=2 in a 2x2 grid, should get all 4 cells
@@ -732,7 +743,8 @@ def test_edge_case_odd_shaped_2x2():
 
 def test_edge_case_n0():
     """Edge case: N=0 (only seed cells)"""
-    sparse = SparseGrid(11, 11, [(5, 5), (2, 2)], L=0)
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(5, 5), (2, 2)], L=0, value=2)
     count = sparse.count_positive_valued_cells()
     
     # With L=0, should only count the seeds themselves
@@ -749,7 +761,8 @@ def test_edge_case_n0():
 
 def test_edge_case_large_n():
     """Edge case: N >> max(W, H)"""
-    sparse = SparseGrid(11, 11, [(5, 5)], L=100)
+    sparse = SparseGrid(11, 11)
+    sparse.set_neighborhoods_to_value([(5, 5)], L=100, value=2)
     count = sparse.count_positive_valued_cells()
     
     # With L=100 in an 11x11 grid, should count all 121 cells
@@ -773,28 +786,28 @@ def test_edge_case_zero_dimensions():
     
     # Test zero rows
     try:
-        sparse = SparseGrid(0, 10, [], L=3)
+        sparse = SparseGrid(0, 10)
         assert False, "Should have raised ValueError for 0 rows"
     except ValueError as e:
         print(f"   ✓ Correctly rejected 0x10 grid: {e}")
     
     # Test zero columns
     try:
-        sparse = SparseGrid(10, 0, [], L=3)
+        sparse = SparseGrid(10, 0)
         assert False, "Should have raised ValueError for 0 columns"
     except ValueError as e:
         print(f"   ✓ Correctly rejected 10x0 grid: {e}")
     
     # Test zero by zero
     try:
-        sparse = SparseGrid(0, 0, [], L=3)
+        sparse = SparseGrid(0, 0)
         assert False, "Should have raised ValueError for 0x0 grid"
     except ValueError as e:
         print(f"   ✓ Correctly rejected 0x0 grid: {e}")
     
     # Test negative dimensions
     try:
-        sparse = SparseGrid(-5, 10, [], L=3)
+        sparse = SparseGrid(-5, 10)
         assert False, "Should have raised ValueError for negative rows"
     except ValueError as e:
         print(f"   ✓ Correctly rejected -5x10 grid: {e}")
@@ -808,20 +821,7 @@ def run_all_tests():
     print("-" * 50)
     
     try:
-        test_set_dense_grid_basic()
-        test_set_dense_grid_empty()
-        test_set_dense_grid_out_of_bounds()
-        test_set_dense_grid_single()
-        test_set_dense_grid_multiple()
-        test_set_dense_grid_modify_existing()
-        test_set_dense_grid_from_sparse_locations()
-        test_count_dense_grid_basic()
-        test_count_dense_grid_all_zeros()
-        test_count_dense_grid_all_nonzero()
-        test_count_dense_grid_with_set_dense_grid()
-        test_count_dense_grid_excludes_negatives()
-        test_set_dense_grid_neighborhoods_overlapping()
-        test_set_dense_grid_neighborhoods_non_overlapping()
+        # Run tests 15–29 first
         test_sparse_grid_class()
         test_hardware_detection()
         test_counting_performance_small()
@@ -841,6 +841,22 @@ def run_all_tests():
         test_edge_case_n0()
         test_edge_case_large_n()
         test_edge_case_zero_dimensions()
+
+        # Then run tests 1–14
+        test_set_dense_grid_basic()
+        test_set_dense_grid_empty()
+        test_set_dense_grid_out_of_bounds()
+        test_set_dense_grid_single()
+        test_set_dense_grid_multiple()
+        test_set_dense_grid_modify_existing()
+        test_set_dense_grid_from_sparse_locations()
+        test_count_dense_grid_basic()
+        test_count_dense_grid_all_zeros()
+        test_count_dense_grid_all_nonzero()
+        test_count_dense_grid_with_set_dense_grid()
+        test_count_dense_grid_excludes_negatives()
+        test_set_dense_grid_neighborhoods_overlapping()
+        test_set_dense_grid_neighborhoods_non_overlapping()
         
         print("-" * 50)
         print("✓ All tests passed!")

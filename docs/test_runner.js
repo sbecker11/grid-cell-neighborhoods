@@ -6,17 +6,29 @@ let loading = false;
 let testPages = [];
 let currentPageIndex = 0;
 
+function setStatus(className, text) {
+    const statusEl = document.getElementById('status');
+    const runButton = document.getElementById('runTests');
+    if (statusEl) {
+        statusEl.className = `status ${className}`;
+        statusEl.textContent = text;
+        statusEl.classList.remove('hidden');
+    }
+    if (runButton) {
+        runButton.textContent = text;
+    }
+}
+
 // Initialize Pyodide runtime (avoid shadowing global window.loadPyodide)
 async function initPyodideRuntime() {
     if (pyodide) return pyodide;
     
-    const statusEl = document.getElementById('status');
     const outputEl = document.getElementById('output');
+    const runButton = document.getElementById('runTests');
     
-    statusEl.className = 'status loading';
-    statusEl.textContent = 'Loading Pyodide (Python runtime)...';
-    statusEl.classList.remove('hidden');
+    setStatus('loading', 'Loading Pyodide (Python runtime)...');
     outputEl.textContent = 'Initializing Pyodide... This may take a moment on first load.\n';
+    if (runButton) runButton.disabled = true;
     
     try {
         // Load Pyodide (assumes pyodide.js script is already loaded)
@@ -30,8 +42,7 @@ async function initPyodideRuntime() {
             fullStdLib: true
         });
         
-        statusEl.className = 'status info';
-        statusEl.textContent = 'Pyodide loaded! Loading NumPy and project modules...';
+        setStatus('info', 'Pyodide loaded! Loading NumPy and project modules...');
         outputEl.textContent += 'Pyodide initialized successfully!\n';
         
         // Load NumPy and other required packages
@@ -39,16 +50,17 @@ async function initPyodideRuntime() {
         outputEl.textContent += 'NumPy loaded successfully!\n';
         
         // Load the Python modules
+        setStatus('info', 'Loading project modules...');
         await loadModules();
         
-        statusEl.className = 'status success';
-        statusEl.textContent = '✓ Ready to run tests!';
+        setStatus('success', '✓ Ready to run tests!');
+        if (runButton) runButton.disabled = false;
         
         return pyodide;
     } catch (error) {
-        statusEl.className = 'status error';
-        statusEl.textContent = `Error loading Pyodide: ${error.message}`;
+        setStatus('error', `Error loading Pyodide: ${error.message}`);
         outputEl.textContent += `\nError: ${error.message}\n`;
+        if (runButton) runButton.disabled = true;
         throw error;
     }
 }
@@ -60,11 +72,11 @@ async function loadModules() {
     try {
         // Fetch sources
         outputEl.textContent += 'Loading grid_counting.py...\n';
-        const gridCountingResponse = await fetch('grid_counting.py');
+        const gridCountingResponse = await fetch('grid_counting.py?v=2');
         const gridCountingCode = await gridCountingResponse.text();
 
         outputEl.textContent += 'Loading grid_counting_tests.py...\n';
-        const testsResponse = await fetch('grid_counting_tests.py');
+        const testsResponse = await fetch('grid_counting_tests.py?v=3');
         const testsCode = await testsResponse.text();
 
         // Write to Pyodide filesystem so Python import system can find them
@@ -145,78 +157,36 @@ function setupPrintCapture() {
 // Parse test output into individual test pages
 function parseTestOutput(output) {
     const lines = output.split('\n');
-    const pages = [];
-    let currentPage = [];
-    let testStartIndex = -1;
-    
-    // Find all test boundaries (lines with ===...=== that are followed by TEST:)
-    const testBoundaries = [];
-    for (let i = 0; i < lines.length - 1; i++) {
-        const line = lines[i];
-        const nextLine = lines[i + 1];
-        // Look for separator line followed by TEST: in next line
-        if (line.trim().match(/^={20,}/) && nextLine.trim().startsWith('TEST:')) {
-            testBoundaries.push(i);
+    const testStartLines = [];
+    let lastStart = -1000;
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].trim().startsWith('TEST:')) {
+            // Skip TEST headers that appear too close to the previous one
+            // (these are usually duplicate wrapper/internal headers)
+            if (i - lastStart > 6) {
+                testStartLines.push(i);
+                lastStart = i;
+            }
         }
     }
-    
-    // If no test boundaries found, return whole output as one page
-    if (testBoundaries.length === 0) {
+    if (testStartLines.length === 0) {
         return [output];
     }
-    
-    // Process each test - include everything from boundary to next boundary
-    for (let i = 0; i < testBoundaries.length; i++) {
-        const startIdx = testBoundaries[i];
-        const endIdx = (i < testBoundaries.length - 1) ? testBoundaries[i + 1] : lines.length;
-        
-        // Extract test content (from separator through next boundary)
-        const testLines = lines.slice(startIdx, endIdx);
-        
-        // Remove trailing blank lines to clean up the output
+    const pages = [];
+    for (let i = 0; i < testStartLines.length; i++) {
+        const start = testStartLines[i];
+        const end = (i < testStartLines.length - 1) ? testStartLines[i + 1] : lines.length;
+        const testLines = lines.slice(start, end);
+        // Trim trailing blank lines
         while (testLines.length > 0 && testLines[testLines.length - 1].trim() === '') {
             testLines.pop();
         }
-        
         if (testLines.length > 0) {
             pages.push(testLines.join('\n'));
         }
     }
-    
-    // Add any trailing content after last test
-    if (testBoundaries.length > 0) {
-        const lastBoundary = testBoundaries[testBoundaries.length - 1];
-        const lastTestEnd = lines.length;
-        if (lastTestEnd > lastBoundary) {
-            // Check if there's additional summary content
-            const remainingLines = lines.slice(lastBoundary);
-            let hasSummary = false;
-            for (const line of remainingLines) {
-                if (line.includes('All tests') || line.includes('tests passed') || 
-                    line.includes('some tests failed')) {
-                    hasSummary = true;
-                    break;
-                }
-            }
-            if (hasSummary) {
-                // Extract from end of last test
-                const lastTestPage = pages[pages.length - 1];
-                const lastTestLines = lastTestPage.split('\n');
-                const summaryStart = lastTestLines.findIndex(l => 
-                    l.includes('All tests') || l.includes('tests passed') || 
-                    l.includes('some tests failed'));
-                if (summaryStart === -1) {
-                    // Summary not in last test, add as new page
-                    const summaryLines = lines.slice(lastBoundary).filter(l => l.trim().length > 0);
-                    if (summaryLines.length > 0) {
-                        pages.push(summaryLines.join('\n'));
-                    }
-                }
-            }
-        }
-    }
-    
-    return pages.length > 0 ? pages : [output];
+    console.log(`[test-runner] Detected ${pages.length} TEST sections (collapsed)`);
+    return pages;
 }
 
 // Display a specific test page
@@ -253,11 +223,11 @@ async function runTests() {
     
     loading = true;
     const runButton = document.getElementById('runTests');
-    const statusEl = document.getElementById('status');
     const outputEl = document.getElementById('output');
     const paginationEl = document.getElementById('pagination');
     
     runButton.disabled = true;
+    setStatus('loading', 'Running tests...');
     outputEl.textContent = '';
     paginationEl.classList.add('hidden');
     testPages = [];
@@ -270,9 +240,7 @@ async function runTests() {
             setupPrintCapture();
         }
         
-        statusEl.className = 'status loading';
-        statusEl.innerHTML = '<span class="spinner"></span>Running tests...';
-        statusEl.classList.remove('hidden');
+        setStatus('loading', 'Running tests...');
         
         // Clear previous output
         clearPythonOutput();
@@ -318,11 +286,9 @@ async function runTests() {
             }
             
             if (testResult) {
-                statusEl.className = 'status success';
-                statusEl.textContent = '✓ All tests passed!';
+                setStatus('success', '✓ All tests passed!');
             } else {
-                statusEl.className = 'status error';
-                statusEl.textContent = '✗ Some tests failed';
+                setStatus('error', '✗ Some tests failed');
             }
             
         } catch (error) {
@@ -331,13 +297,11 @@ async function runTests() {
             const captured = getPythonOutput();
             outputEl.textContent = (captured || '') + '\n' + errorMsg;
             
-            statusEl.className = 'status error';
-            statusEl.textContent = `✗ Error running tests: ${errorMsg}`;
+            setStatus('error', `✗ Error running tests: ${errorMsg}`);
         }
         
     } catch (error) {
-        statusEl.className = 'status error';
-        statusEl.textContent = `Error: ${error.message}`;
+        setStatus('error', `Error: ${error.message}`);
         outputEl.textContent += `\nError: ${error.message}\n`;
     } finally {
         loading = false;
@@ -349,12 +313,15 @@ async function runTests() {
 window.addEventListener('DOMContentLoaded', async () => {
     // Preload Pyodide in the background
     try {
+        const runButton = document.getElementById('runTests');
+        if (runButton) runButton.disabled = true;
+        setStatus('loading', 'Loading Pyodide (Python runtime)...');
         await initPyodideRuntime();
         setupPrintCapture();
         
         const statusEl = document.getElementById('status');
-        statusEl.className = 'status success';
-        statusEl.textContent = '✓ Ready to run tests!';
+        setStatus('success', 'Run Tests Now');
+        if (runButton) runButton.disabled = false;
     } catch (error) {
         console.error('Failed to initialize Pyodide:', error);
     }
