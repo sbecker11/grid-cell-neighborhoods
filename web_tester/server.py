@@ -4,9 +4,9 @@ Start the GitHub Pages-style test runner locally on the first available port
 and print the URL to open.
 
 Usage:
-  python3 start_test_runner.py
+  python3 server.py
 
-The server will serve the contents of the `docs/` directory and will continue
+The server will serve the contents of the `web_tester/` directory and will continue
 running until interrupted (Ctrl+C).
 """
 
@@ -73,14 +73,10 @@ def kill_pids(pids: list[int]) -> None:
 
 
 def main() -> int:
-    repo_root = os.path.dirname(os.path.abspath(__file__))
-    docs_dir = os.path.join(repo_root, "docs")
-    if not os.path.isdir(docs_dir):
-        print("docs/ directory not found next to this script.", file=sys.stderr)
-        return 1
-
-    # Change working directory to docs/ so relative paths in index.html work
-    os.chdir(docs_dir)
+    # Script is in web_tester/ directory, serve from current directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # We're already in web_tester/, so serve from current directory
+    os.chdir(script_dir)
 
     try:
         print("Checking port 8000...")
@@ -119,7 +115,7 @@ def main() -> int:
         return 130
 
     class DocsHandler(SimpleHTTPRequestHandler):
-        # Serve files from the current working directory (docs/)
+        # Serve files from the current working directory (web_tester/)
         def log_message(self, format: str, *args) -> None:
             # Keep standard logging behavior
             super().log_message(format, *args)
@@ -133,7 +129,7 @@ def main() -> int:
         server = ThreadingHTTPServer(("", port), DocsHandler)
 
     url = f"http://localhost:{port}"
-    print(f"Serving test runner from docs/ at: {url}")
+    print(f"Serving test runner from web_tester/ at: {url}")
     print(f"Open {url} in your browser")
     print("Press Ctrl+C to stop.")
     try:

@@ -450,16 +450,205 @@ print(f"Active cells: {count}")
 
 ## Running Tests
 
+This project includes comprehensive testing with 29 test cases covering functionality, edge cases, and performance benchmarks. Tests are run automatically on every commit via GitHub Actions across multiple operating systems.
+
+### Test Coverage
+
+The test suite (`grid_counting_tests.py`) includes:
+
+1. **Basic functionality tests** (15 tests)
+   - Setting locations to values
+   - Setting Manhattan neighborhoods
+   - Counting positive-valued cells
+   - Edge cases (empty, out-of-bounds, single locations)
+
+2. **Hardware detection tests** (1 test)
+   - Detects available accelerators (NumPy, PyTorch, JAX)
+   - Reports OS-specific information
+   - Validates CPU/GPU/TPU detection
+
+3. **Performance benchmarks** (1 test)
+   - Small array performance validation
+   - Ensures operations complete within expected time limits
+
+4. **Project requirement examples** (4 tests)
+   - Example scenarios from project specification
+   - Validates correctness of neighborhood calculations
+
+5. **Edge case tests** (8 tests)
+   - Corner placements
+   - Odd-shaped arrays (1×21, 10×1, 2×2, 1×1)
+   - Extreme values (N=0, N >> max dimensions)
+   - Error handling (zero dimensions)
+
+### Local Testing
+
+#### Prerequisites
+
+Install dependencies:
 ```bash
-# Activate virtual environment first
+# Create and activate virtual environment (recommended)
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
+# On macOS/Linux: source venv/bin/activate
 
-# Run all tests (functionality + performance benchmarks)
-python grid_counting_tests.py
+# Install required packages
+pip install -r requirements.txt
 
-# Run with pytest (if installed)
-pytest grid_counting_tests.py -v
+# Optional: For hardware detection tests (installs PyTorch and JAX)
+pip install torch>=2.0.0 jax>=0.4.0 jaxlib>=0.4.0
 ```
+
+#### Run All Tests
+
+```bash
+# Run all 29 test cases
+python grid_counting_tests.py
+```
+
+Expected output:
+- Each test shows numbered headers: `TEST N: [test name]`
+- OS information displayed in first test
+- Hardware detection results in hardware test
+- Performance metrics in performance test
+- Summary: `✓ All tests passed!` (if all succeed)
+
+#### Run Specific Test Categories
+
+```bash
+# Using pytest (if installed)
+pytest grid_counting_tests.py -v
+
+# Run specific test function
+pytest grid_counting_tests.py::test_set_dense_grid_basic -v
+```
+
+#### Test Output Format
+
+Local test runs display numbered headers with consistent formatting:
+```
+======================================================================
+TEST 1: set_dense_grid (diagonal pattern)
+======================================================================
+Operating System: Darwin 24.6.0 (...)
+Platform: x86_64 / i386
+...
+✓ Basic set_locations test passed
+
+======================================================================
+TEST 2: set_dense_grid with empty locations (no locations specified)
+======================================================================
+...
+```
+
+**Formatting rules:**
+- Numbered headers: `TEST N: [title]` wrapped with `====` lines (no leading blank line)
+- Blank line appears after each test's pass message
+- Unnumbered internal headers are automatically filtered out
+- Browser output matches shell output format
+
+### Browser-Based Testing
+
+**No installation required!** Run tests directly in your browser:
+
+1. Visit: [https://sbecker11.github.io/grid-cell-neighborhoods/](https://sbecker11.github.io/grid-cell-neighborhoods/)
+2. Click "Run Tests Now" (after Pyodide loads)
+3. Navigate through all 29 tests using pagination
+4. View detailed output for each test case
+
+The browser test runner:
+- Loads Python runtime (Pyodide) automatically
+- Displays tests with pagination (29 pages)
+- Shows OS information and hardware detection
+- Works on any device with a modern browser
+
+### Continuous Integration (GitHub Actions)
+
+Tests automatically run on every push and pull request via GitHub Actions:
+
+#### Test Matrix
+
+Tests run on **9 configurations** (3 OS × 3 Python versions):
+
+**macOS:**
+- Python 3.9
+- Python 3.10
+- Python 3.11
+
+**Windows:**
+- Python 3.9
+- Python 3.10
+- Python 3.11
+
+**Linux (Ubuntu):**
+- Python 3.9
+- Python 3.10
+- Python 3.11
+
+#### View CI Results
+
+1. Go to your repository on GitHub
+2. Click the **"Actions"** tab
+3. Select the latest workflow run
+4. View results for each OS/Python combination
+
+Each job runs:
+- All 29 test cases from `grid_counting_tests.py`
+- Hardware detection (confirms CPU-only environment)
+- Performance validation
+
+#### CI Test Environment
+
+- **Hardware**: CPU-only runners (no GPUs available)
+- **Libraries**: NumPy, PyTorch (CPU), JAX (CPU)
+- **Purpose**: Validates cross-platform compatibility and correctness
+
+### Expected Test Results
+
+#### Successful Run
+
+```
+Running tests for 2D array positive value counting...
+--------------------------------------------------
+[29 test cases run]
+--------------------------------------------------
+✓ All tests passed!
+```
+
+#### Failed Test Example
+
+```
+✗ Test failed: AssertionError: Expected 25 cells for N=3 centered, got 24
+```
+
+### Troubleshooting
+
+#### Tests Fail Locally
+
+1. **Missing dependencies**: Ensure NumPy is installed (`pip install numpy`)
+2. **Python version**: Requires Python 3.9+ (tested on 3.9, 3.10, 3.11)
+3. **Import errors**: Check that `grid_counting.py` is in the same directory
+
+#### CI Tests Fail
+
+1. Check GitHub Actions logs for specific error
+2. Verify code works locally first
+3. Check for OS-specific issues (path separators, line endings)
+4. Ensure all dependencies are in `requirements.txt`
+
+#### Browser Tests Don't Run
+
+1. Hard refresh browser (Ctrl+Shift+R or Cmd+Shift+R)
+2. Check browser console for errors
+3. Ensure JavaScript is enabled
+4. Try different browser if issues persist
+
+### Test File Locations
+
+- **Main test suite**: `grid_counting_tests.py`
+- **Browser test runner**: `docs/grid_counting_tests.py` (same tests, browser-optimized)
+- **Test runner JavaScript**: `docs/test_runner.js`
+- **CI workflow**: `.github/workflows/test.yml`
 
 ## License
 

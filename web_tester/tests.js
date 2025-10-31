@@ -1,9 +1,9 @@
 // Quick test of the parseTestOutput function
-// Run with: node test_parser.js
+// Run with: node tests.js
 
 const fs = require('fs');
 
-// Simplified version of parseTestOutput from test_runner.js
+// Simplified version of parseTestOutput from client.js
 function parseTestOutput(output) {
     const lines = output.split('\n');
     const pages = [];

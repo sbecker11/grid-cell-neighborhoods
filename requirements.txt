@@ -1,13 +1,40 @@
-# Core dependency
+# ==============================================================================
+# PREREQUISITE: pip version requirement
+# ==============================================================================
+# Before installing dependencies, upgrade pip to the recommended version:
+#   python -m pip install --upgrade "pip>=24.0"
+#
+# Or check your pip version:
+#   pip --version
+#
+# Recommended: pip>=24.0 (for better dependency resolution and cross-platform support)
+
+# ==============================================================================
+# Core dependency (required on all OSes)
+# ==============================================================================
 # Using numpy<2 to ensure compatibility with PyTorch/JAX compiled modules
 numpy>=1.20.0,<2.0.0
 
-# GPU acceleration (install as needed)
-torch>=2.0.0  # For CUDA/MPS GPU support (install separately with appropriate CUDA version)
-jax>=0.4.0  # For GPU/TPU acceleration (install separately with CUDA support if using GPU)
-jaxlib>=0.4.0  # JAX library dependency
+# Dependency conflict resolution
+# Resolves conflict with llama-index-core which requires PyYAML>=6.0.1
+PyYAML>=6.0.1
 
-# For installation with GPU support:
-# PyTorch with CUDA: pip install torch --index-url https://download.pytorch.org/whl/cu118
-# JAX with CUDA: pip install jax[cuda11_local] -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+# Optional: Hardware acceleration libraries (for hardware detection tests)
+# Install CPU-only versions (works on all OSes):
+#   pip install torch jax jaxlib
+#
+# OS-specific GPU support (optional, for actual GPU acceleration):
+#
+# macOS (Apple Silicon):
+#   - MPS (Metal Performance Shaders): Built into PyTorch for Apple Silicon
+#   - Install: pip install torch (automatically uses MPS on Apple Silicon)
+#
+# Windows/Linux (NVIDIA GPU):
+#   - CUDA via PyTorch: pip install torch --index-url https://download.pytorch.org/whl/cu118
+#   - CUDA via JAX: pip install jax[cuda11_local] -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+#
+# For GitHub Actions and local testing without GPU, install CPU-only versions:
+torch>=2.0.0
+jax>=0.4.0
+jaxlib>=0.4.0
 

@@ -70,13 +70,19 @@ async function loadModules() {
     const outputEl = document.getElementById('output');
     
     try {
-        // Fetch sources
+        // Fetch sources (symlinks in web_tester/ directory)
         outputEl.textContent += 'Loading grid_counting.py...\n';
-        const gridCountingResponse = await fetch('grid_counting.py?v=3');
+        const gridCountingResponse = await fetch('grid_counting.py?v=4');
+        if (!gridCountingResponse.ok) {
+            throw new Error(`Failed to fetch grid_counting.py: ${gridCountingResponse.status} ${gridCountingResponse.statusText}`);
+        }
         const gridCountingCode = await gridCountingResponse.text();
 
         outputEl.textContent += 'Loading grid_counting_tests.py...\n';
-        const testsResponse = await fetch('grid_counting_tests.py?v=14');
+        const testsResponse = await fetch('grid_counting_tests.py?v=15');
+        if (!testsResponse.ok) {
+            throw new Error(`Failed to fetch grid_counting_tests.py: ${testsResponse.status} ${testsResponse.statusText}`);
+        }
         const testsCode = await testsResponse.text();
 
         // Write to Pyodide filesystem so Python import system can find them
@@ -155,50 +161,91 @@ function setupPrintCapture() {
 }
 
 // Parse test output into individual test pages
+// Formatting: Only numbered "TEST N:" headers are used for pagination.
+// Unnumbered "TEST:" headers are removed to match shell output format.
 function parseTestOutput(output) {
     const lines = output.split('\n');
     const testStartLines = [];
-    let lastStart = -1000;
+    
+    // ALWAYS use numbered TEST N: headers only (ignore unnumbered TEST: headers)
     for (let i = 0; i < lines.length; i++) {
-        // Match both "TEST N:" (numbered) and "TEST:" (wrapper) patterns
         const trimmed = lines[i].trim();
+        // Only match numbered "TEST N:" headers
         const numberedMatch = trimmed.match(/^TEST\s+(\d+):\s+(.+)$/);
-        const unnumberedMatch = trimmed.startsWith('TEST:');
-        if (numberedMatch || unnumberedMatch) {
-            // Skip TEST headers that appear too close to the previous one
-            // (these are usually duplicate wrapper/internal headers)
-            if (i - lastStart > 6) {
-                testStartLines.push(i);
-                lastStart = i;
-            }
+        if (numberedMatch) {
+            testStartLines.push(i);
         }
     }
+    
     if (testStartLines.length === 0) {
         return [output];
     }
+    
     const pages = [];
     for (let i = 0; i < testStartLines.length; i++) {
         let start = testStartLines[i];
-        // If the line before the TEST: line is a ==== line, include it
+        
+        // Include the ==== line before the TEST N: header if it exists
+        // DO NOT include blank line before ==== (we want no leading blank line)
         if (start > 0 && lines[start - 1].trim() === '='.repeat(70)) {
             start = start - 1;
+            // Skip blank line before ==== if present (remove leading blank line)
+            // Check if there's a blank line, but don't include it
+            if (start > 0 && lines[start - 1].trim() === '') {
+                // There is a blank line, but we'll start from the ==== line anyway
+                // (start already points to the ==== line, which is what we want)
+            }
         }
+        
+        // Remove leading blank lines from the test content
+        // This ensures no blank line appears before the ==== line
+        while (start < lines.length && lines[start].trim() === '') {
+            start++;
+        }
+        
         const end = (i < testStartLines.length - 1) ? testStartLines[i + 1] : lines.length;
         const testLines = lines.slice(start, end);
+        
+        // Remove unnumbered TEST: headers, keep only numbered TEST N: headers
+        const cleanedLines = [];
+        for (let j = 0; j < testLines.length; j++) {
+            const line = testLines[j];
+            const trimmed = line.trim();
+            // Match unnumbered "TEST:" headers (but not numbered ones)
+            const isUnnumberedHeader = trimmed.startsWith('TEST:') && !trimmed.match(/^TEST\s+\d+:/);
+            
+            if (isUnnumberedHeader) {
+                // Skip unnumbered TEST: headers and their surrounding ==== lines
+                // Skip the ==== line before if we just added it
+                if (cleanedLines.length > 0 && cleanedLines[cleanedLines.length - 1].trim() === '='.repeat(70)) {
+                    cleanedLines.pop();
+                    // Also remove blank line before ==== if present
+                    if (cleanedLines.length > 0 && cleanedLines[cleanedLines.length - 1].trim() === '') {
+                        cleanedLines.pop();
+                    }
+                }
+                // Skip the unnumbered header line itself and the ==== line after it
+                j++; // Skip next line (which should be the ==== line after TEST:)
+                continue;
+            }
+            cleanedLines.push(line);
+        }
+        
         // Trim trailing blank lines and trailing ==== lines
-        while (testLines.length > 0) {
-            const lastLine = testLines[testLines.length - 1].trim();
+        while (cleanedLines.length > 0) {
+            const lastLine = cleanedLines[cleanedLines.length - 1].trim();
             if (lastLine === '' || lastLine === '='.repeat(70)) {
-                testLines.pop();
+                cleanedLines.pop();
             } else {
                 break;
             }
         }
-        if (testLines.length > 0) {
-            pages.push(testLines.join('\n'));
+        
+        if (cleanedLines.length > 0) {
+            pages.push(cleanedLines.join('\n'));
         }
     }
-    console.log(`[test-runner] Detected ${pages.length} TEST sections (collapsed)`);
+    console.log(`[test-runner] Detected ${pages.length} TEST sections (numbered only)`);
     return pages;
 }
 
@@ -215,13 +262,11 @@ function displayPage(pageIndex) {
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     
-    // Get the test content and add test number to TEST: label
+    // Get the test content (already has numbered TEST N: titles)
     let testContent = testPages[pageIndex];
     const testNumber = pageIndex + 1;
     
-    // Replace "TEST: " with "TEST N: " where N is the test number
-    testContent = testContent.replace(/^TEST: /m, `TEST ${testNumber}: `);
-    
+    // Content already has numbered headers, use as-is
     outputEl.textContent = testContent;
     pageInfoEl.textContent = `Test ${testNumber} of ${testPages.length}`;
     

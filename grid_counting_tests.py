@@ -63,9 +63,16 @@ def print_test_separator():
 
 _TEST_INDEX = 1
 _TEST_TOTAL = 29
+
 def _header_numbered(title: str):
+    """
+    Print a numbered test header.
+    
+    Format: No leading blank line, numbered header (TEST N:), blank line after test.
+    Note: Individual test functions also print unnumbered "TEST:" headers internally,
+    but these are filtered out in local runs and removed by JavaScript parser in web runs.
+    """
     global _TEST_INDEX
-    print()
     print("=" * 70)
     print(f"TEST {_TEST_INDEX}: {title}")
     print("=" * 70)
@@ -106,6 +113,7 @@ def test_set_dense_grid_basic():
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Basic set_locations test passed")
+    print()  # Blank line after test
 
 
 def test_set_dense_grid_empty():
@@ -132,7 +140,7 @@ def test_set_dense_grid_empty():
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Empty locations test passed")
-
+    print()  # Blank line after test
 
 def test_set_dense_grid_out_of_bounds():
     """Test with out-of-bounds locations (should be ignored)"""
@@ -169,7 +177,7 @@ def test_set_dense_grid_out_of_bounds():
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Out-of-bounds locations test passed")
-
+    print()  # Blank line after test
 
 def test_set_dense_grid_single():
     """Test with single location"""
@@ -195,7 +203,7 @@ def test_set_dense_grid_single():
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Single location test passed")
-
+    print()  # Blank line after test
 
 def test_set_dense_grid_multiple():
     """Test with multiple locations"""
@@ -221,7 +229,7 @@ def test_set_dense_grid_multiple():
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Multiple locations test passed")
-
+    print()  # Blank line after test
 
 def test_set_dense_grid_modify_existing():
     """Test modifying existing array"""
@@ -249,7 +257,7 @@ def test_set_dense_grid_modify_existing():
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Modify existing array test passed")
-
+    print()  # Blank line after test
 
 def test_set_dense_grid_from_sparse_locations():
     """Test creating dense grid from sparse locations"""
@@ -275,8 +283,7 @@ def test_set_dense_grid_from_sparse_locations():
     count = grid.count_positive_valued_cells()
     print(f"   Positive count: {count}")
     print("✓ Create sparse grid test passed")
-
-
+    print()  # Blank line after test
 
 def test_count_dense_grid_basic():
     """Test basic count_nonzero functionality (counts only positive values)"""
@@ -297,7 +304,7 @@ def test_count_dense_grid_basic():
             print(f"   {line}")
     print(f"   Positive count: {result}")
     print("✓ Basic count_nonzero test passed")
-
+    print()  # Blank line after test
 
 def test_count_dense_grid_all_zeros():
     """Test count_nonzero with all zeros"""
@@ -318,7 +325,7 @@ def test_count_dense_grid_all_zeros():
             print(f"   {line}")
     print(f"   Positive count: {result}")
     print("✓ Count non-zero all zeros test passed")
-
+    print()  # Blank line after test
 
 def test_count_dense_grid_all_nonzero():
     """Test count_nonzero with all positive values"""
@@ -339,7 +346,7 @@ def test_count_dense_grid_all_nonzero():
             print(f"   {line}")
     print(f"   Positive count: {result}")
     print("✓ Count non-zero all positive test passed")
-
+    print()  # Blank line after test
 
 def test_count_dense_grid_with_set_dense_grid():
     """Test count_nonzero with set_dense_grid (values set to 2 = positive)"""
@@ -359,7 +366,7 @@ def test_count_dense_grid_with_set_dense_grid():
             print(f"   {line}")
     print(f"   Positive count: {count}")
     print("✓ Count non-zero with set_locations test passed")
-
+    print()  # Blank line after test
 
 def test_count_dense_grid_excludes_negatives():
     """Test that negative values are excluded"""
@@ -390,7 +397,7 @@ def test_count_dense_grid_excludes_negatives():
     
     print(f"   Positive count: {result}")
     print("✓ Count excludes negative values test passed")
-
+    print()  # Blank line after test
 
 def test_set_dense_grid_neighborhoods_overlapping():
     """Test that overlapping neighborhoods are counted correctly (no double counting)"""
@@ -443,7 +450,7 @@ def test_set_dense_grid_neighborhoods_overlapping():
     print(f"   Manhattan distance between seeds: {dist_between}")
     print(f"   Positive count: {count} (overlapping regions counted once)")
     print("✓ Overlapping Manhattan neighborhoods test passed")
-
+    print()  # Blank line after test
 
 def test_set_dense_grid_neighborhoods_non_overlapping():
     """Test two seeds with Manhattan distance > L (non-overlapping neighborhoods)"""
@@ -490,7 +497,7 @@ def test_set_dense_grid_neighborhoods_non_overlapping():
     print(f"   Manhattan distance between seeds: {dist_between}")
     print(f"   Positive count: {count} (separate neighborhoods)")
     print("✓ Non-overlapping Manhattan neighborhoods test passed")
-
+    print()  # Blank line after test
 
 def test_set_neighborhoods_preserves_already_set_cells():
     """Test that set_neighborhoods_to_value only sets unset cells (preserves existing values)"""
@@ -541,7 +548,7 @@ def test_set_neighborhoods_preserves_already_set_cells():
     print(f"   Cell (2,2) value: {grid.grid[2, 2]} (set by set_neighborhoods_to_value)")
     print(f"   Positive count: {count}")
     print("✓ Preserves already-set cells test passed")
-
+    print()  # Blank line after test
 
 def test_set_to_zero_overwrites_all_cells():
     """Test that setting value=0 overwrites all cells regardless of current value"""
@@ -578,7 +585,7 @@ def test_set_to_zero_overwrites_all_cells():
     print("=" * 70)
     print("✓ Setting value=0 clears all appropriate cells regardless of current value")
     print("✓ Set to zero overwrites test passed")
-
+    print()  # Blank line after test
 
 def test_sparse_grid_class():
     """Test SparseGrid class functionality"""
@@ -602,7 +609,7 @@ def test_sparse_grid_class():
     print(f"   L: {sparse.L}")
     print(f"   Count: {count}")
     print("✓ SparseGrid class test passed")
-
+    print()  # Blank line after test
 
 def test_hardware_detection():
     """Test that hardware detection works and at least NumPy is available"""
@@ -663,7 +670,7 @@ def test_hardware_detection():
         print(f"  JAX: ✗ Not installed")
     
     print("✓ Hardware detection test passed")
-
+    print()  # Blank line after test
 
 def test_counting_performance_small():
     """Test counting performance on small array"""
@@ -685,7 +692,7 @@ def test_counting_performance_small():
     
     print(f"  Count: {result} in {elapsed*1000:.4f}ms")
     print("✓ Small array performance test passed")
-
+    print()  # Blank line after test
 
 def test_manhattan_performance_comparison():
     """Test that direct counting is faster than grid creation"""
@@ -727,7 +734,7 @@ def test_manhattan_performance_comparison():
     
     print(f"  Direct counting is {avg_grid/avg_direct:.2f}x faster")
     print("✓ Manhattan performance comparison test passed")
-
+    print()  # Blank line after test
 
 def test_example_1_n3_centered():
     """Example 1: One positive cell fully contained; N=3"""
@@ -748,7 +755,7 @@ def test_example_1_n3_centered():
     print(f"   Grid: 11x11, Seed: (5,5), L=3")
     print(f"   Count: {count} cells")
     print("✓ Example 1 (N=3, centered, 25 cells) test passed")
-
+    print()  # Blank line after test
 
 def test_example_2_n3_near_edge():
     """Example 2: One positive cell near an edge; N=3"""
@@ -767,7 +774,7 @@ def test_example_2_n3_near_edge():
     print(f"   Grid: 11x11, Seed: (5,2), L=3")
     print(f"   Count: {count} cells (1 cell fell off edge)")
     print("✓ Example 2 (N=3, near edge, 24 cells) test passed")
-
+    print()  # Blank line after test
 
 def test_example_3_n2_disjoint():
     """Example 3: Two positive values with disjoint neighborhoods; N=2"""
@@ -786,7 +793,7 @@ def test_example_3_n2_disjoint():
     print(f"   Grid: 11x11, Seeds: (2,2) and (8,8), L=2")
     print(f"   Count: {count} cells (13 per neighborhood, no overlap)")
     print("✓ Example 3 (N=2, disjoint, 26 cells) test passed")
-
+    print()  # Blank line after test
 
 def test_example_4_n2_overlapping():
     """Example 4: Two positive values with overlapping neighborhoods; N=2"""
@@ -807,7 +814,7 @@ def test_example_4_n2_overlapping():
     print(f"   Grid: 11x11, Seeds: (5,5) and (6,6), L=2")
     print(f"   Count: {count} cells (overlapping regions counted once)")
     print("✓ Example 4 (N=2, overlapping, ~22 cells) test passed")
-
+    print()  # Blank line after test
 
 def test_edge_case_corner():
     """Edge case: Positive value in a corner"""
@@ -826,7 +833,7 @@ def test_edge_case_corner():
     print(f"   Grid: 11x11, Seed: (0,0) corner, L=2")
     print(f"   Count: {count} cells")
     print("✓ Corner edge case test passed")
-
+    print()  # Blank line after test
 
 def test_edge_case_odd_shaped_1x21():
     """Edge case: Odd shaped array 1x21"""
@@ -846,7 +853,7 @@ def test_edge_case_odd_shaped_1x21():
     print(f"   Grid: 1x21, Seed: (0,10), L=3")
     print(f"   Count: {count} cells")
     print("✓ 1x21 edge case test passed")
-
+    print()  # Blank line after test
 
 def test_edge_case_odd_shaped_1x1():
     """Edge case: Smallest array 1x1"""
@@ -864,7 +871,7 @@ def test_edge_case_odd_shaped_1x1():
     print(f"   Grid: 1x1, Seed: (0,0), L=10")
     print(f"   Count: {count} cells")
     print("✓ 1x1 edge case test passed")
-
+    print()  # Blank line after test
 
 def test_edge_case_odd_shaped_10x1():
     """Edge case: Long vertical array 10x1"""
@@ -884,7 +891,7 @@ def test_edge_case_odd_shaped_10x1():
     print(f"   Grid: 10x1, Seed: (5,0), L=3")
     print(f"   Count: {count} cells")
     print("✓ 10x1 edge case test passed")
-
+    print()  # Blank line after test
 
 def test_edge_case_odd_shaped_2x2():
     """Edge case: Small square 2x2"""
@@ -902,7 +909,7 @@ def test_edge_case_odd_shaped_2x2():
     print(f"   Grid: 2x2, Seed: (0,0), L=2")
     print(f"   Count: {count} cells")
     print("✓ 2x2 edge case test passed")
-
+    print()  # Blank line after test
 
 def test_edge_case_n0():
     """Edge case: N=0 (only seed cells)"""
@@ -920,7 +927,7 @@ def test_edge_case_n0():
     print(f"   Grid: 11x11, Seeds: (5,5) and (2,2), L=0")
     print(f"   Count: {count} cells (only seed locations)")
     print("✓ N=0 edge case test passed")
-
+    print()  # Blank line after test
 
 def test_edge_case_large_n():
     """Edge case: N >> max(W, H)"""
@@ -938,7 +945,7 @@ def test_edge_case_large_n():
     print(f"   Grid: 11x11, Seed: (5,5), L=100")
     print(f"   Count: {count} cells (entire grid)")
     print("✓ Large N edge case test passed")
-
+    print()  # Blank line after test
 
 def test_edge_case_zero_dimensions():
     """Edge case: Zero dimensions should raise ValueError"""
@@ -976,6 +983,7 @@ def test_edge_case_zero_dimensions():
         print(f"   ✓ Correctly rejected -5x10 grid: {e}")
     
     print("✓ Zero dimensions edge case test passed")
+    print()  # Blank line after test
 
 
 def run_all_tests():
@@ -1038,7 +1046,9 @@ if __name__ == "__main__":
     print()
     
     # Run tests
-    # Locally suppress internal TEST header blocks to avoid duplicate headers.
+    # Formatting: Only numbered "TEST N:" headers are shown in shell output.
+    # Unnumbered "TEST:" headers (printed by individual test functions) are filtered out
+    # to avoid duplicates. This ensures consistent formatting between shell and web outputs.
     try:
         import builtins as _b
         if not hasattr(_b, "_orig_print"):

@@ -1,13 +1,14 @@
-# GitHub Pages Test Runner
+# Web Tester
 
-This directory contains the static website for running unit tests in the browser using Pyodide.
+This directory contains the web-based test runner for running unit tests in the browser using Pyodide.
 
 ## Files
 
 - `index.html` - Main HTML page with UI
-- `test_runner.js` - JavaScript that loads Pyodide and executes tests
-- `grid_counting.py` - Main Python module
-- `grid_counting_tests.py` - Test suite
+- `client.js` - Client-side JavaScript that loads Pyodide and executes tests in browser
+- `server.py` - Server-side Python script to serve files locally for development
+- `tests.js` - Utility script for testing output parsing
+- `favicon.ico` - Favicon for the web interface
 
 ## Setup for GitHub Pages
 
@@ -22,16 +23,17 @@ The site will be available at: `https://<username>.github.io/<repository-name>/`
 
 To test locally before deploying:
 
-1. Start a local web server (Python 3):
+1. Start the local web server:
    ```bash
-   cd docs
-   python3 -m http.server 8000
+   python3 web_tester/server.py
    ```
 
-2. Open in browser:
-   ```
-   http://localhost:8000
-   ```
+2. The server will automatically:
+   - Find an available port (starting at 8000)
+   - Serve files from the `web_tester/` directory
+   - Display the URL to open (e.g., `http://localhost:8000`)
+
+3. Open the URL in your browser and click "Run Tests Now"
 
 ## How It Works
 
