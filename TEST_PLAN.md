@@ -66,7 +66,7 @@ python grid_counting_tests.py
 - Final message: `✓ All tests passed!`
 
 **Verification Checklist:**
-- [ ] Test count: 29 tests total
+- [ ] Test count: 31 tests total
 - [ ] Test headers are numbered (TEST 1, TEST 2, ..., TEST 29)
 - [ ] Each numbered header has `====` lines above and below
 - [ ] No duplicate "TEST:" headers in output
@@ -154,7 +154,7 @@ python grid_counting_tests.py
 - Final message: `✓ All tests passed!`
 
 **Verification Checklist:**
-- [ ] Test count: 29 tests total
+- [ ] Test count: 31 tests total
 - [ ] Test headers are numbered (TEST 1, TEST 2, ..., TEST 29)
 - [ ] Each numbered header has `====` lines above and below
 - [ ] No duplicate "TEST:" headers in output
@@ -217,7 +217,7 @@ python grid_counting_tests.py
 - Final message: `✓ All tests passed!`
 
 **Verification Checklist:**
-- [ ] Test count: 29 tests total
+- [ ] Test count: 31 tests total
 - [ ] Test headers are numbered (TEST 1, TEST 2, ..., TEST 29)
 - [ ] Each numbered header has `====` lines above and below
 - [ ] No duplicate "TEST:" headers in output
@@ -267,7 +267,7 @@ Complete Part 1 setup steps (1.1.0) before running web tests. The server require
 **Expected Results:**
 - Pyodide loads successfully (no console errors)
 - "Run Tests Now" button is enabled after loading
-- All 29 tests run and pass
+- All 31 tests run and pass
 - Pagination shows "Test 1 of 29", "Test 2 of 29", etc.
 - Each test page shows:
   - Numbered test header
@@ -280,7 +280,7 @@ Complete Part 1 setup steps (1.1.0) before running web tests. The server require
 **Verification Checklist:**
 - [ ] Pyodide loads without errors
 - [ ] Button becomes enabled after loading
-- [ ] Test count: 29 tests
+- [ ] Test count: 31 tests
 - [ ] Pagination works (next/previous buttons)
 - [ ] Each test shows correct output
 - [ ] No console errors in browser DevTools
@@ -335,13 +335,13 @@ python web_tester\server.py
 **Expected Results:** (Same as macOS browser tests)
 - Pyodide loads successfully (no console errors)
 - "Run Tests Now" button is enabled after loading
-- All 29 tests run and pass
+- All 31 tests run and pass
 - Pagination shows "Test 1 of 29", "Test 2 of 29", etc.
 
 **Verification Checklist:**
 - [ ] Pyodide loads without errors
 - [ ] Button becomes enabled after loading
-- [ ] Test count: 29 tests
+- [ ] Test count: 31 tests
 - [ ] Pagination works (next/previous buttons)
 - [ ] Each test shows correct output
 - [ ] No console errors in browser DevTools
@@ -388,13 +388,13 @@ Complete Part 3 setup steps (3.1.0) before running web tests. The server require
 **Expected Results:** (Same as macOS/Windows browser tests)
 - Pyodide loads successfully (no console errors)
 - "Run Tests Now" button is enabled after loading
-- All 29 tests run and pass
+- All 31 tests run and pass
 - Pagination shows "Test 1 of 29", "Test 2 of 29", etc.
 
 **Verification Checklist:**
 - [ ] Pyodide loads without errors
 - [ ] Button becomes enabled after loading
-- [ ] Test count: 29 tests
+- [ ] Test count: 31 tests
 - [ ] Pagination works (next/previous buttons)
 - [ ] Each test shows correct output
 - [ ] No console errors in browser DevTools
@@ -473,7 +473,7 @@ GitHub Pages tests verify that the web tester works when deployed as a static si
 **Expected Results:**
 - Pyodide loads successfully (no console errors)
 - "Run Tests Now" button becomes enabled after loading
-- All 29 tests run and pass
+- All 31 tests run and pass
 - Pagination shows "Test 1 of 29", "Test 2 of 29", etc.
 - Each test page shows:
   - Numbered test header
@@ -486,7 +486,7 @@ GitHub Pages tests verify that the web tester works when deployed as a static si
 **Verification Checklist:**
 - [ ] Pyodide loads without errors
 - [ ] Button becomes enabled after loading
-- [ ] Test count: 29 tests
+- [ ] Test count: 31 tests
 - [ ] Pagination works (next/previous buttons)
 - [ ] Each test shows correct output
 - [ ] No console errors in browser DevTools
@@ -520,28 +520,215 @@ Test the GitHub Pages site from different environments:
 
 ---
 
+## Part 6: GitHub Actions Tests (Automated Cross-Platform Testing)
+
+GitHub Actions automatically runs tests on all three operating systems (macOS, Windows, Linux) whenever code is pushed or a pull request is created.
+
+### Test 6.1: Trigger GitHub Actions Workflow
+
+**Prerequisites:**
+- GitHub Actions enabled (default for public repos)
+
+**Steps - Option A: Manual Trigger (No push/PR needed):**
+
+1. Go to your GitHub repository
+2. Click **"Actions"** tab at the top
+3. Select **"Test Suite"** workflow from the left sidebar
+4. Click **"Run workflow"** button (top right)
+5. Select branch (usually `main`)
+6. Click **"Run workflow"** button
+
+**Steps - Option B: Push to trigger automatically:**
+
+1. **Push changes to trigger workflow:**
+   ```bash
+   git add .
+   git commit -m "Your commit message"
+   git push origin main
+   ```
+
+2. **Workflow automatically starts** after push
+
+**Steps - Option C: Create Pull Request:**
+
+1. ```bash
+   git checkout -b feature-branch
+   git add .
+   git commit -m "Your changes"
+   git push origin feature-branch
+   ```
+2. Create PR via GitHub web interface
+3. **Workflow automatically starts** after PR creation
+
+**Expected Results:**
+- GitHub Actions workflow triggers automatically
+- Workflow runs 3 jobs sequentially (not in parallel):
+  1. Test on macOS (Python 3.11)
+  2. Test on Windows (Python 3.11)
+  3. Test on Ubuntu/Linux (Python 3.11)
+
+**Verification Checklist:**
+- [ ] Workflow appears in GitHub Actions tab
+- [ ] All 3 OS jobs appear in the workflow run
+- [ ] Jobs run sequentially (one completes before next starts)
+
+---
+
+### Test 6.2: Monitor GitHub Actions Execution
+
+**Steps:**
+
+1. Go to your GitHub repository
+2. Click **"Actions"** tab at the top
+3. Select the latest workflow run
+4. Monitor job execution
+
+**Expected Behavior:**
+- Jobs run **sequentially** (not in parallel):
+  - macOS job completes first
+  - Windows job starts after macOS completes
+  - Ubuntu job starts after Windows completes
+- Each job shows progress:
+  - Checkout code
+  - Set up Python 3.11
+  - Cache pip packages
+  - Install dependencies (NumPy, PyTorch, JAX)
+  - Run grid counting tests (`python grid_counting_tests.py`)
+  - All 31 tests pass
+
+**Verification Checklist:**
+- [ ] macOS job completes successfully
+- [ ] Windows job completes successfully
+- [ ] Ubuntu job completes successfully
+- [ ] Each job shows "✓ All tests passed!" in output
+- [ ] All jobs show green checkmarks (✓)
+- [ ] Total execution time displayed
+
+---
+
+### Test 6.3: Review Test Output for Each OS
+
+For each OS job, verify the test output shows correct platform information:
+
+**macOS Job:**
+- Operating System: `Darwin ...`
+- Platform: `arm64` (Apple Silicon) or `x86_64` (Intel)
+- Hardware detection mentions MPS (if Apple Silicon) or no GPU
+
+**Windows Job:**
+- Operating System: `Windows ...`
+- Platform: `AMD64`
+- Hardware detection mentions CUDA (if available) or no GPU
+
+**Linux/Ubuntu Job:**
+- Operating System: `Linux ...`
+- Platform: `x86_64`
+- Hardware detection mentions CUDA (if available) or no GPU
+
+**Verification Checklist:**
+- [ ] Each OS shows correct platform information in first test
+- [ ] Test output format matches local Python tests
+- [ ] Numbered test headers (TEST 1 through TEST 31)
+- [ ] All 31 tests pass on all 3 OSes
+- [ ] No errors or warnings in job logs
+- [ ] Exit code: 0 (success) for all jobs
+
+---
+
+### Test 6.4: Verify Cross-Platform Consistency
+
+**Steps:**
+
+1. Compare test outputs across all 3 OSes
+2. Verify same tests pass on all platforms
+3. Check that OS-specific information differs (as expected)
+
+**Expected Results:**
+- All 31 tests pass on all 3 operating systems
+- Test logic results are consistent across platforms
+- Only OS/platform information differs (expected)
+- Output formatting is consistent (numbered headers, spacing)
+
+**Verification Checklist:**
+- [ ] Same test count (31) on all OSes
+- [ ] Same test names and order on all OSes
+- [ ] Same assertion results (tests behave identically)
+- [ ] Consistent output formatting across all OSes
+- [ ] OS information correctly reflects each platform
+
+---
+
+### Test 6.5: Handle Test Failures
+
+If a test fails on any OS:
+
+**Steps:**
+
+1. Click on the failed job in GitHub Actions
+2. Expand the "Run grid counting tests" step
+3. Review error messages and stack traces
+4. Check which test(s) failed
+5. Compare with local test results
+
+**Common Issues:**
+
+- **Dependency installation failures**: Check `requirements.txt` is correct
+- **Python version mismatch**: Ensure Python 3.11 is specified
+- **Path issues**: Check file paths work on Windows (backslashes) and Unix (forward slashes)
+- **OS-specific behavior**: Some tests may behave differently (e.g., hardware detection)
+
+**Verification Checklist:**
+- [ ] Understand why test failed
+- [ ] Reproduce failure locally if possible
+- [ ] Fix issue and push updated code
+- [ ] Verify fix by checking new workflow run
+
+---
+
+### Test 6.6: View Workflow History
+
+**Steps:**
+
+1. Go to repository → **Actions** tab
+2. View list of all workflow runs
+3. Click any run to see details
+
+**Information Available:**
+- Success/failure status for each run
+- Execution time for each job
+- Which commit triggered the run
+- Branch or PR that triggered the run
+
+**Verification Checklist:**
+- [ ] Can see workflow run history
+- [ ] Can identify which commit triggered each run
+- [ ] Can view detailed logs for any run
+- [ ] Can see job execution times
+
+---
+
 ## Test Summary Checklist
 
 ### Part 1: Local macOS Shell Tests
-- [ ] Python unit tests pass (29/29)
+- [ ] Python unit tests pass (31/31)
 - [ ] Output formatting is correct
 - [ ] No errors in console/logs
 - [ ] OS information displayed correctly
 
 ### Part 2: Local Windows Shell Tests
-- [ ] Python unit tests pass (29/29)
+- [ ] Python unit tests pass (31/31)
 - [ ] Output formatting is correct
 - [ ] No errors in console/logs
 - [ ] OS information displayed correctly
 
 ### Part 3: Local Linux Shell Tests
-- [ ] Python unit tests pass (29/29)
+- [ ] Python unit tests pass (31/31)
 - [ ] Output formatting is correct
 - [ ] No errors in console/logs
 - [ ] OS information displayed correctly
 
 ### Part 4: Local Web Tests
-- [ ] Browser-based tests pass (29/29)
+- [ ] Browser-based tests pass (31/31)
 - [ ] Pyodide loads successfully
 - [ ] Pagination works correctly
 - [ ] No console errors in browser
@@ -550,9 +737,19 @@ Test the GitHub Pages site from different environments:
 - [ ] GitHub Pages enabled
 - [ ] Site deploys successfully
 - [ ] Page loads without errors
-- [ ] All 29 tests pass on GitHub Pages
+- [ ] All 31 tests pass on GitHub Pages
 - [ ] Works across different browsers
 - [ ] No CORS or loading errors
+
+### Part 6: GitHub Actions Tests
+- [ ] Workflow triggers on push/PR
+- [ ] All 3 OS jobs run successfully (macOS, Windows, Linux)
+- [ ] All 31 tests pass on macOS
+- [ ] All 31 tests pass on Windows
+- [ ] All 31 tests pass on Ubuntu/Linux
+- [ ] Jobs run sequentially (one at a time)
+- [ ] OS-specific information displayed correctly
+- [ ] Output formatting consistent across all OSes
 
 ---
 
@@ -589,13 +786,14 @@ Test the GitHub Pages site from different environments:
 ## Success Criteria
 
 All tests pass when:
-1. ✅ Part 1: Local macOS shell tests: 29/29 passing
-2. ✅ Part 2: Local Windows shell tests: 29/29 passing
-3. ✅ Part 3: Local Linux shell tests: 29/29 passing
-4. ✅ Part 4: Local web tests: 29/29 passing
-5. ✅ Part 5: GitHub Pages: Site deploys and all 29 tests pass
-6. ✅ Output formatting consistent across all test environments
-7. ✅ No errors in logs or console
+1. ✅ Part 1: Local macOS shell tests: 31/31 passing
+2. ✅ Part 2: Local Windows shell tests: 31/31 passing
+3. ✅ Part 3: Local Linux shell tests: 31/31 passing
+4. ✅ Part 4: Local web tests: 31/31 passing
+5. ✅ Part 5: GitHub Pages: Site deploys and all 31 tests pass
+6. ✅ Part 6: GitHub Actions: All 3 OS jobs pass with 31/31 tests each
+7. ✅ Output formatting consistent across all test environments
+8. ✅ No errors in logs or console
 
 ---
 
