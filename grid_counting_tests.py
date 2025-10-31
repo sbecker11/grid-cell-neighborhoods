@@ -3,6 +3,20 @@ Unit tests for 2D array positive value counting functions.
 Includes functionality tests and performance benchmarks.
 """
 
+import sys
+import io
+
+# Ensure UTF-8 encoding for Windows compatibility (handles Unicode checkmarks)
+if sys.platform == 'win32':
+    # Reconfigure stdout/stderr to use UTF-8 on Windows
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    else:
+        # Fallback for older Python versions
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
 import numpy as np
 import time
 import platform

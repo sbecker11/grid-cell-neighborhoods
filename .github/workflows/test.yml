@@ -52,4 +52,6 @@ jobs:
         # Suppress hardware acceleration warnings in CI
         JAX_PLATFORM_NAME: cpu
         CUDA_VISIBLE_DEVICES: ""
+        # Ensure UTF-8 encoding for Windows (handles Unicode checkmarks)
+        PYTHONIOENCODING: utf-8
 
