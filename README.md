@@ -606,12 +606,6 @@ Running tests for 2D array positive value counting...
 ✓ All tests passed!
 ```
 
-#### Failed Test Example
-
-```
-✗ Test failed: AssertionError: Expected 25 cells for N=3 centered, got 24
-```
-
 ### Troubleshooting
 
 #### Tests Fail Locally
