@@ -76,7 +76,7 @@ async function loadModules() {
         const gridCountingCode = await gridCountingResponse.text();
 
         outputEl.textContent += 'Loading grid_counting_tests.py...\n';
-        const testsResponse = await fetch('grid_counting_tests.py?v=13');
+        const testsResponse = await fetch('grid_counting_tests.py?v=14');
         const testsCode = await testsResponse.text();
 
         // Write to Pyodide filesystem so Python import system can find them

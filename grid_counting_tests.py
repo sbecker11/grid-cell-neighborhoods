@@ -5,6 +5,7 @@ Includes functionality tests and performance benchmarks.
 
 import numpy as np
 import time
+import platform
 from grid_counting import (
     detect_available_accelerators,
     DenseGrid,
@@ -73,6 +74,15 @@ def _header_numbered(title: str):
  
 def test_set_dense_grid_basic():
     """Test basic set_dense_grid functionality (now sets to 2)"""
+    # Report operating system information
+    os_name = platform.system()
+    os_release = platform.release()
+    os_version = platform.version()
+    machine = platform.machine()
+    processor = platform.processor()
+    print(f"Operating System: {os_name} {os_release} ({os_version})")
+    print(f"Platform: {machine} / {processor}")
+    
     grid = DenseGrid(3, 3)
     grid.set_locations_to_value([(0, 0), (1, 1), (2, 2)])
     result = grid.grid
@@ -600,16 +610,58 @@ def test_hardware_detection():
     print("=" * 70)
     print("TEST: Hardware detection")
     print("=" * 70)
+    
+    # Show platform information
+    os_name = platform.system()
+    print(f"Platform: {os_name}")
     print("Testing hardware detection...")
+    
     accelerators = detect_available_accelerators()
     
     # At minimum, NumPy should be available
     assert 'numpy' in accelerators, "NumPy should always be available"
     assert accelerators['numpy'] == True, "NumPy should be True"
     
-    print(f"  NumPy: {'✓ Available' if accelerators['numpy'] else '✗ Not available'}")
-    print(f"  PyTorch: {'✓ Available' if accelerators.get('pytorch_cuda') else '✗ Not available'}")
-    print(f"  JAX: {'✓ Available' if accelerators.get('jax_gpu') else '✗ Not available'}")
+    # Check if libraries are installed
+    pytorch_installed = False
+    jax_installed = False
+    try:
+        import torch
+        pytorch_installed = True
+    except ImportError:
+        pass
+    try:
+        import jax
+        jax_installed = True
+    except ImportError:
+        pass
+    
+    print(f"  NumPy: {'✓ Available' if accelerators['numpy'] else '✗ Not available'} (always required)")
+    
+    if pytorch_installed:
+        print(f"  PyTorch: ✓ Installed")
+        if os_name == "Darwin":  # macOS
+            print(f"    - CUDA: {'✓ Available' if accelerators.get('pytorch_cuda') else '✗ Not available (NVIDIA GPU required)'}")
+            print(f"    - MPS: {'✓ Available' if accelerators.get('pytorch_mps') else '✗ Not available (Apple Silicon required)'}")
+        elif os_name == "Windows":
+            print(f"    - CUDA: {'✓ Available' if accelerators.get('pytorch_cuda') else '✗ Not available (NVIDIA GPU + CUDA drivers required)'}")
+            print(f"    - MPS: N/A (Windows)")
+        else:  # Linux
+            print(f"    - CUDA: {'✓ Available' if accelerators.get('pytorch_cuda') else '✗ Not available (NVIDIA GPU + CUDA drivers required)'}")
+            print(f"      Linux supports: CUDA via PyTorch (NVIDIA GPUs)")
+            print(f"    - MPS: N/A (macOS/Apple Silicon only)")
+    else:
+        print(f"  PyTorch: ✗ Not installed")
+    
+    if jax_installed:
+        print(f"  JAX: ✓ Installed")
+        print(f"    - GPU: {'✓ Available' if accelerators.get('jax_gpu') else '✗ Not available (GPU drivers required)'}")
+        if os_name == "Linux" and not accelerators.get('jax_gpu'):
+            print(f"      Linux supports: JAX GPU via CUDA (requires CUDA drivers)")
+        print(f"    - TPU: {'✓ Available' if accelerators.get('jax_tpu') else '✗ Not available (Google Cloud TPU required)'}")
+    else:
+        print(f"  JAX: ✗ Not installed")
+    
     print("✓ Hardware detection test passed")
 
 
