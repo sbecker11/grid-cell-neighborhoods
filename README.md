@@ -450,7 +450,7 @@ print(f"Active cells: {count}")
 
 ## Running Tests
 
-This project includes comprehensive testing with 29 test cases covering functionality, edge cases, and performance benchmarks. Tests are run automatically on every commit via GitHub Actions across multiple operating systems.
+This project includes comprehensive testing with 31 test cases covering functionality, edge cases, and performance benchmarks. Tests are run automatically on every commit via GitHub Actions across multiple operating systems.
 
 ### Test Coverage
 
@@ -502,7 +502,7 @@ pip install torch>=2.0.0 jax>=0.4.0 jaxlib>=0.4.0
 #### Run All Tests
 
 ```bash
-# Run all 29 test cases
+# Run all 31 test cases
 python grid_counting_tests.py
 ```
 
@@ -553,12 +553,12 @@ TEST 2: set_dense_grid with empty locations (no locations specified)
 
 1. Visit: [https://sbecker11.github.io/grid-cell-neighborhoods/](https://sbecker11.github.io/grid-cell-neighborhoods/)
 2. Click "Run Tests Now" (after Pyodide loads)
-3. Navigate through all 29 tests using pagination
+3. Navigate through all 31 tests using pagination
 4. View detailed output for each test case
 
 The browser test runner:
 - Loads Python runtime (Pyodide) automatically
-- Displays tests with pagination (29 pages)
+- Displays tests with pagination (31 pages)
 - Shows OS information and hardware detection
 - Works on any device with a modern browser
 
@@ -568,22 +568,13 @@ Tests automatically run on every push and pull request via GitHub Actions:
 
 #### Test Matrix
 
-Tests run on **9 configurations** (3 OS × 3 Python versions):
+Tests run on **3 operating systems** with Python 3.11:
 
-**macOS:**
-- Python 3.9
-- Python 3.10
-- Python 3.11
+- **macOS** (macos-latest)
+- **Windows** (windows-latest)
+- **Linux** (ubuntu-latest)
 
-**Windows:**
-- Python 3.9
-- Python 3.10
-- Python 3.11
-
-**Linux (Ubuntu):**
-- Python 3.9
-- Python 3.10
-- Python 3.11
+![GitHub Actions Test Results](docs/GitHub%20Actions%20Tests%20(Automated%20Cross-Platform%20Testing)%20Results.png)
 
 #### View CI Results
 
@@ -593,7 +584,7 @@ Tests run on **9 configurations** (3 OS × 3 Python versions):
 4. View results for each OS/Python combination
 
 Each job runs:
-- All 29 test cases from `grid_counting_tests.py`
+- All 31 test cases from `grid_counting_tests.py`
 - Hardware detection (confirms CPU-only environment)
 - Performance validation
 
@@ -610,7 +601,7 @@ Each job runs:
 ```
 Running tests for 2D array positive value counting...
 --------------------------------------------------
-[29 test cases run]
+[31 test cases run]
 --------------------------------------------------
 ✓ All tests passed!
 ```
